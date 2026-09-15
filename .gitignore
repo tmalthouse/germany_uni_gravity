@@ -1,3 +1,6 @@
+# Local settings with credentials (see .env.example)
+.env
+
 # Python / tooling
 __pycache__/
 *.py[cod]

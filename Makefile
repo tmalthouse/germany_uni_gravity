@@ -24,6 +24,10 @@ RAW_SRC ?= $(HOME)/Dropbox/1848_unis
 # only add a warning to every log.
 unexport VIRTUAL_ENV
 
+# Local, uncommitted settings such as HISTORIC_BASEMAP_URL (see .env.example).
+-include .env
+export HISTORIC_BASEMAP_URL
+
 RAW := data/raw
 MANUAL := data/manual
 INTERIM := data/interim
@@ -198,7 +202,8 @@ $(FIGURES)/heidelberg_religion.png: $(FINAL) $(SRC)/analysis/heidelberg_religion
                                     $(HEIDELBERG) $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.heidelberg_religion 2>&1 | tee $(LOGS)/heidelberg_religion.log
 
-$(FIGURES)/student_map.html: $(FINAL) $(SRC)/analysis/student_map.py | $(LOGS)
+$(FIGURES)/student_map.html: $(FINAL) $(SRC)/analysis/student_map.py \
+                             $(SRC)/gravity/constants.py $(wildcard .env) | $(LOGS)
 	$(PY) unis.analysis.student_map 2>&1 | tee $(LOGS)/student_map.log
 $(FIGURES)/student_map.png: $(FIGURES)/student_map.html
 	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
