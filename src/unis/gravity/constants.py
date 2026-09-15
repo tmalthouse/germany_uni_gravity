@@ -10,6 +10,15 @@ ERA_LABELS = {1: '1800s', 2: '1810s', 3: '1820s', 4: '1830s', 5: '1840s'}
 
 NEW_UNIVERSITIES = ['berlin', 'bonn']
 
+# Display names for tables. muenchen_old is the university's Landshut seat
+# (before the 1826 move to Munich).
+UNIVERSITY_NAMES = {
+    'berlin': 'Berlin', 'bonn': 'Bonn', 'erlangen': 'Erlangen', 'freiburg': 'Freiburg',
+    'giessen': 'Gießen', 'goettingen': 'Göttingen', 'heidelberg': 'Heidelberg',
+    'jena': 'Jena', 'kiel': 'Kiel', 'marburg': 'Marburg', 'muenchen': 'München',
+    'muenchen_old': 'München (Landshut)', 'tuebingen': 'Tübingen', 'wuerzburg': 'Würzburg',
+}
+
 # --- Göttingen Seven (§8) -----------------------------------------------------
 # King Ernst August dismissed seven professors in December 1837; 1837 is the
 # omitted reference year in every event study.

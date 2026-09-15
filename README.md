@@ -34,7 +34,7 @@ data/raw/         frozen sources, copied once (gitignored; checksums in data/raw
 data/manual/      small hand-curated inputs (tracked)
 data/interim/     pipeline intermediates (rebuilt)
 data/processed/   analysis datasets: students_final, od, od_year (rebuilt)
-output/           tables/ (CSV), figures/ (PNG, map HTML), logs/ (rebuilt)
+output/           tables/ (CSV + booktabs .tex), figures/ (PNG, map HTML), logs/ (rebuilt)
 src/unis/         the package: one module per pipeline stage or published output
 tests/            pytest suite, plus the synthetic geocoder fixture and its generator
 docs/findings.md  research log
@@ -56,9 +56,45 @@ docs/findings.md  research log
 | Analyses | `unis.analysis.*` | OD grids, `students_final` | `output/tables/`, `output/figures/` |
 
 Shared helpers: `unis.paths` (every file location), `unis.geo` (great-circle
-distance), `unis.plotting` (figure style), `unis.gravity.constants` (design
-constants), `unis.gravity.eventstudy` (the single-destination event study used
-by the Göttingen Seven analyses), `unis.gravity.heidelberg` (religion sample).
+distance), `unis.plotting` (figure style), `unis.latex` (booktabs tabulars),
+`unis.gravity.constants` (design constants and display names),
+`unis.gravity.eventstudy` (the single-destination event study used by the
+Göttingen Seven analyses, and its path table), `unis.gravity.heidelberg`
+(religion sample).
+
+## LaTeX tables
+
+Every analysis that writes a CSV table also writes a publication version next
+to it in `output/tables/`. Each `.tex` file holds only a `tabular`, so the
+caption, label, notes and float live in the paper:
+
+```latex
+\usepackage{booktabs}   % preamble
+...
+\begin{table}
+  \centering
+  \caption{...}\label{tab:gravity}
+  \input{output/tables/gravity_results.tex}
+\end{table}
+```
+
+| File | Contents |
+|---|---|
+| `gravity_results.tex` | the five gravity specifications, one column each, with observations and fixed-effect rows |
+| `event_study_1819.tex` | border effect by enrollment year in two side-by-side blocks; the reference year's row is the `same_state` coefficient |
+| `goettingen7_event_study.tex` | Göttingen × year path with pre-trend and post-period Wald p-values |
+| `goettingen7_heterogeneity.tex` | near- and far-origin paths side by side |
+| `goettingen7_matched.tex` | paths for the three donor pools, with Wald p-values per pool |
+| `goettingen7_reallocation.tex` | destination shares (%) before and after, and the change (percentage points), far vs near origins |
+| `goettingen7_reallocation_ppml.tex` | the PPML reallocation check |
+| `goettingen7_placebo.tex` | per university: 1838 coefficient, deepest dip and its year, 1838–47 mean |
+
+Conventions, for the table notes: estimates to three decimals, standard
+errors in parentheses beneath (regression tables) or in an SE column (path
+tables), SEs clustered by origin, and 1837 shown as the reference year in the
+Göttingen paths. Stars appear only in the two regression tables:
+\* p < 0.10, \*\* p < 0.05, \*\*\* p < 0.01. Design B and the Heidelberg
+religion PPML still only print their estimates to the logs.
 
 ## Sources
 

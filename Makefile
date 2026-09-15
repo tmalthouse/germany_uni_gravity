@@ -65,6 +65,7 @@ GOT7 := goettingen7_event_study goettingen7_heterogeneity goettingen7_reallocati
         goettingen7_matched
 TABLE_FILES := $(TABLES)/gravity_results.csv $(TABLES)/event_study_1819.csv \
                $(GOT7:%=$(TABLES)/%.csv) $(TABLES)/goettingen7_placebo.csv
+TEX_FILES := $(TABLE_FILES:.csv=.tex) $(TABLES)/goettingen7_reallocation_ppml.tex
 FIGURE_FILES := $(FIGURES)/era_coefficients.png $(FIGURES)/event_study_1819.png \
                 $(FIGURES)/design_b_composition.png \
                 $(GOT7:%=$(FIGURES)/%.png) $(FIGURES)/goettingen7_placebo.png \
@@ -76,7 +77,7 @@ MAP_FILES := $(FIGURES)/student_map.html $(FIGURES)/student_map.png
 all: analysis map
 data: $(FINAL)
 analysis: tables figures
-tables: $(TABLE_FILES)
+tables: $(TABLE_FILES) $(TEX_FILES)
 figures: $(FIGURE_FILES)
 map: $(MAP_FILES)
 
@@ -132,13 +133,20 @@ $(OD): $(OD_YEAR)
 
 # --- analyses ------------------------------------------------------------------
 PLOTTING := $(SRC)/plotting.py
-EVENTSTUDY := $(SRC)/gravity/eventstudy.py $(SRC)/gravity/constants.py $(PLOTTING)
+LATEX := $(SRC)/latex.py $(SRC)/gravity/constants.py
+EVENTSTUDY := $(SRC)/gravity/eventstudy.py $(LATEX) $(PLOTTING)
 HEIDELBERG := $(SRC)/gravity/heidelberg.py $(SRC)/geo.py $(PLOTTING)
 
-$(TABLES)/gravity_results.csv: $(OD) $(SRC)/analysis/gravity_baseline.py | $(LOGS)
+# Every table script writes its .csv, then its booktabs .tex.
+$(TABLE_FILES:.csv=.tex): $(TABLES)/%.tex: $(TABLES)/%.csv
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
+$(TABLES)/goettingen7_reallocation_ppml.tex: $(TABLES)/goettingen7_reallocation.csv
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
+
+$(TABLES)/gravity_results.csv: $(OD) $(SRC)/analysis/gravity_baseline.py $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.gravity_baseline 2>&1 | tee $(LOGS)/gravity_baseline.log
 
-$(TABLES)/event_study_1819.csv: $(OD_YEAR) $(SRC)/analysis/event_study_1819.py | $(LOGS)
+$(TABLES)/event_study_1819.csv: $(OD_YEAR) $(SRC)/analysis/event_study_1819.py $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.event_study_1819 2>&1 | tee $(LOGS)/event_study_1819.log
 
 $(FIGURES)/era_coefficients.png: $(TABLES)/gravity_results.csv \

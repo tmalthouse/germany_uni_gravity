@@ -9,14 +9,18 @@ Estimated with pyfixest's fepois; SEs clustered by origin (hometown place).
 The OD grid is zero-padded: zeros identify the extensive margin, which is what
 PPML needs for consistent estimation with FE (Santos Silva & Tenreyro 2006).
 
-od.parquet -> output/tables/gravity_results.csv
+od.parquet -> output/tables/gravity_results.csv, output/tables/gravity_results.tex
 """
+
+import re
 
 import numpy as np
 import polars as pl
 import pyfixest as pf
 
 from unis import paths
+from unis.gravity.constants import ERA_LABELS
+from unis.latex import Tabular, integer, num, se, stars
 
 OUT = paths.TABLES / 'gravity_results.csv'
 
@@ -36,6 +40,76 @@ SPECS = {
     'confession_split': 'flow ~ log_dist + same_city + same_polity '
                         '+ ss_sc + ss_dc + ds_sc | origin_id + dest',
 }
+
+# --- LaTeX table ---------------------------------------------------------------
+SPEC_LABELS = {
+    'baseline': 'Baseline',
+    'dist_x_era': r'Distance $\times$ era',
+    'state_x_era': r'Border $\times$ era',
+    'both_x_era': r'Both $\times$ era',
+    'confession_split': 'Confession',
+}
+# Also the row order.
+VARIABLE_LABELS = {
+    'log_dist': 'Log distance',
+    'same_state': 'Same state',
+    'same_polity': 'Same polity',
+    'same_city': 'Same city',
+    'ss_sc': 'Same state, same confession',
+    'ss_dc': 'Same state, different confession',
+    'ds_sc': 'Different state, same confession',
+}
+FIXED_EFFECTS = [
+    ('Origin FE', 'origin_id'),
+    ('Destination FE', 'dest'),
+    (r'Destination $\times$ era FE', 'era^dest'),
+]
+
+
+def split_coef(name: str) -> tuple[str, int | None]:
+    """'log_dist:C(era)[T.3]' -> ('log_dist', 3); 'same_state' -> ('same_state', None)."""
+    m = re.fullmatch(r'(.+):C\(era\)\[T\.(\d+)\]', name)
+    return (m.group(1), int(m.group(2))) if m else (name, None)
+
+
+def coef_label(name: str) -> str:
+    var, era = split_coef(name)
+    label = VARIABLE_LABELS[var]
+    return label if era is None else rf'{label} $\times$ {ERA_LABELS[era]}'
+
+
+def write_tex(results: dict, path) -> None:
+    """One column per specification: estimates with stars, SEs beneath."""
+    names = list(results)
+    tidy = {n: fit.tidy() for n, fit in results.items()}
+    order = list(VARIABLE_LABELS)
+    coefs = sorted({c for t in tidy.values() for c in t.index},
+                   key=lambda c: (order.index(split_coef(c)[0]), split_coef(c)[1] or 0))
+
+    t = Tabular('l' + 'c' * len(names))
+    t.row('', *[f'({i})' for i in range(1, len(names) + 1)])
+    t.row('', *[SPEC_LABELS[n] for n in names]).midrule()
+    for c in coefs:
+        estimates, errors = [], []
+        for n in names:
+            if c in tidy[n].index:
+                r = tidy[n].loc[c]
+                estimates.append(num(r['Estimate']) + stars(r['Pr(>|t|)']))
+                errors.append(se(r['Std. Error']))
+            else:
+                estimates.append('')
+                errors.append('')
+        t.row(coef_label(c), *estimates)
+        t.row('', *errors)
+    t.midrule()
+    t.row('Observations', *[integer(results[n]._N) for n in names])
+    for label, fe in FIXED_EFFECTS:
+        t.row(label, *['Yes' if fe in fixed_effects(SPECS[n]) else '' for n in names])
+    t.write(path)
+
+
+def fixed_effects(formula: str) -> list[str]:
+    return [f.strip() for f in formula.split('|')[1].split('+')]
 
 
 def main() -> None:
@@ -60,6 +134,7 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.write_csv(OUT)
     print(f'wrote {OUT}: {out.shape}')
+    write_tex(results, OUT.with_suffix('.tex'))
 
     # Joint test: are all era interactions zero? (Wald, per specification)
     for name, fit in results.items():

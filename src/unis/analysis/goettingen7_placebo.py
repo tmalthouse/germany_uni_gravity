@@ -5,7 +5,7 @@ university treated in turn. Göttingen's actual path is overlaid. The figure and
 summary use the well-identified placebos only; the CSV keeps every path.
 
 od_year.parquet, output/tables/goettingen7_event_study.csv
-    -> output/tables/goettingen7_placebo.csv, output/figures/goettingen7_placebo.png
+    -> output/tables/goettingen7_placebo.{csv,tex}, output/figures/goettingen7_placebo.png
 """
 
 import matplotlib.pyplot as plt
@@ -14,8 +14,14 @@ import pandas as pd
 import polars as pl
 
 from unis import paths
-from unis.gravity.constants import GOETTINGEN_SEVEN_LABEL, TREAT_YEAR, load_od_year_window
+from unis.gravity.constants import (
+    GOETTINGEN_SEVEN_LABEL,
+    TREAT_YEAR,
+    UNIVERSITY_NAMES,
+    load_od_year_window,
+)
 from unis.gravity.eventstudy import fit_year_path, year_path
+from unis.latex import Tabular, multicolumn, num
 from unis.plotting import mark_event, save, set_style
 
 OUT_CSV = paths.TABLES / 'goettingen7_placebo.csv'
@@ -35,6 +41,33 @@ DEGENERATE = ['erlangen', 'jena', 'muenchen']
 
 def post_mean(ev: pd.DataFrame) -> float:
     return ev[(ev['year'] >= POST[0]) & (ev['year'] <= POST[1])]['est'].mean()
+
+
+def summary_cells(dest: str, ev: pd.DataFrame) -> list[str]:
+    """University, 1838 coefficient, deepest dip and its year, post-period mean."""
+    rest = ev[ev['year'] != TREAT_YEAR]
+    dip = rest.loc[rest['est'].idxmin()]
+    at_1838 = ev.loc[ev['year'] == POST[0], 'est'].iloc[0]
+    return [UNIVERSITY_NAMES[dest], num(at_1838), num(dip['est']), str(int(dip['year'])),
+            num(post_mean(ev))]
+
+
+def write_tex(got: pd.DataFrame, paths_by_dest: dict[str, pd.DataFrame], clean: list[str], path) -> None:
+    t = Tabular('lcccc')
+    t.row('University', str(POST[0]), 'Deepest dip', 'Year of dip',
+          f'Mean {POST[0]}--{str(POST[1])[2:]}').midrule()
+    panels = [
+        ('Treated', {'goettingen': got}),
+        ('Placebos', {d: paths_by_dest[d] for d in clean}),
+        ('Placebos with gaps in source coverage', {d: paths_by_dest[d] for d in DEGENERATE}),
+    ]
+    for i, (title, evs) in enumerate(panels):
+        if i:
+            t.space()
+        t.row(multicolumn(5, 'l', rf'\textit{{{title}}}'))
+        for dest, ev in evs.items():
+            t.row(*summary_cells(dest, ev))
+    t.write(path)
 
 
 def main() -> None:
@@ -61,6 +94,7 @@ def main() -> None:
 
     # How unusual is Göttingen? Depth and persistence, well-identified placebos only.
     clean = [d for d in PLACEBOS if d not in DEGENERATE]
+    write_tex(got, paths_by_dest, clean, OUT_CSV.with_suffix('.tex'))
     plc_mins = pd.Series({d: paths_by_dest[d]['est'].min() for d in clean})
     plc_post = pd.Series({d: post_mean(paths_by_dest[d]) for d in clean})
     got_min = got['est'].min()

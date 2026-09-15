@@ -8,7 +8,8 @@ the two paths share the likelihood and FE structure:
            + got_near x year dummies + got_far x year dummies
            | origin_id + dest + first_year
 
-od_year.parquet -> output/tables/goettingen7_heterogeneity.csv, output/figures/goettingen7_heterogeneity.png
+od_year.parquet -> output/tables/goettingen7_heterogeneity.{csv,tex},
+                   output/figures/goettingen7_heterogeneity.png
 """
 
 import matplotlib.pyplot as plt
@@ -25,6 +26,8 @@ from unis.gravity.constants import (
     distance_to_goettingen,
     load_od_year_window,
 )
+from unis.gravity.eventstudy import path_table
+from unis.latex import integer
 from unis.plotting import mark_event, save, set_style
 
 OUT_CSV = paths.TABLES / 'goettingen7_heterogeneity.csv'
@@ -71,6 +74,15 @@ def main() -> None:
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     ev.to_csv(OUT_CSV, index=False)
     print(f'wrote {OUT_CSV}')
+    paths_for_table = {
+        rf'Near origins ($<${FAR_KM} km)': parts['near'],
+        rf'Far origins ($\geq${FAR_KM} km)': parts['far'],
+    }
+    path_table(
+        {label: p.rename(columns={'Estimate': 'est', 'Std. Error': 'se'})
+         for label, p in paths_for_table.items()},
+        footer=[('Observations', [integer(fit._N)])],
+    ).write(OUT_CSV.with_suffix('.tex'))
 
     ev['lo'] = ev['Estimate'] - 1.96 * ev['Std. Error']
     ev['hi'] = ev['Estimate'] + 1.96 * ev['Std. Error']
