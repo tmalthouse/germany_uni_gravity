@@ -119,11 +119,12 @@ the linkage synthetic evaluation (`make_synthetic.py`,
   CSVs in unsorted directory order, and Berlin, Bonn, Jena and Marburg
   forward-fill ditto marks across file boundaries, so the order changes the
   data. `manual/out_final_order.txt` records the original order.
-- **Student linkage is not deterministic.** The linkage stage estimates u
-  from an unseeded random sample of pairs (`USING SAMPLE`). Two runs of the
-  original code on identical input gave 98,782 and 98,476 students.
-  Enrollment spells (`spell_id`) are unaffected, and every live analysis uses
-  spells, not students.
+- **Student linkage is deterministic** since the fix described below. The
+  original estimated u from an unseeded random sample of pairs; two runs of
+  it on identical input gave 98,782 and 98,476 students.
+- **Estimates drift in about the 6th decimal between runs** on identical
+  input (the estimator's threaded numerics), so compare tables with a
+  tolerance rather than byte for byte.
 - **The map jitter is not deterministic** either: `unique('spell_id')` does
   not fix row order, so the seeded noise lands on different points each run.
 - **The map is centred explicitly.** Plotly's default centre is the mean
@@ -167,10 +168,20 @@ Each fix is its own commit, and its message records the effect on results.
   to every row. Of the rows with a recorded field, the share that now gets a
   group: Berlin 100%, Bonn 99.5%, Jena 97.4%, Tübingen 99.0%. No gravity
   analysis uses `field`, so tables and figures are unchanged.
+- **Deterministic student linkage.** The original drew the pairs that
+  estimate u with an unseeded `USING SAMPLE`, and several other steps
+  depended on scan order: the spell aggregates (`any_value`, `mode`,
+  `arg_max`), the EM pattern tables, the order in which edges are merged, and
+  the unstable Tübingen sort that fixes record ids. The sample is now seeded
+  and every tie is broken explicitly (`tests/test_linkage.py`). Two full
+  rebuilds give identical `students_final.parquet`, with 97,227 students
+  (the previous code gave a different count each run, e.g. 97,252 and
+  97,284). Spells are unchanged in number; 8 Berlin origin-year cells of the
+  OD grid change by one enrollment, and estimates move in the 4th decimal at
+  most (Göttingen 1838: −0.5232 → −0.5231).
 
 ## Known issues carried over unchanged
 
 These issues from the original are left as they were.
 
 - **Unmapped origin confession is `''`, not `unknown`** (findings, Data).
-- **Linkage u-sampling is unseeded** (above).

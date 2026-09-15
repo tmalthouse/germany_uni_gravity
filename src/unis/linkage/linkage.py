@@ -17,13 +17,15 @@ Usage:
     python -m unis.linkage.linkage students.parquet --out linked.parquet --threshold 0.9
     python -m unis.linkage.linkage synth.parquet --eval    # ground-truth evaluation
 
-KNOWN ISSUE (not yet fixed): stage_u draws its random pairs with an unseeded
-`USING SAMPLE`, so u -- and with it the student clustering -- changes from run
-to run. Spells (stage 2) are deterministic.
+Deterministic: the same input gives the same spells and students on every run.
+The random pairs that estimate u come from a seeded draw (U_SAMPLE_SEED), and
+every aggregate or ordering that would otherwise depend on DuckDB's scan order
+breaks ties explicitly.
 """
 
 import argparse
 import math
+import random
 from collections import defaultdict
 
 import duckdb
@@ -41,6 +43,7 @@ ANNUAL_THRESHOLD = 1.25      # rows per name-key above which a source is annual
 MAX_OVERLAP = 1              # years two spells at different schools may overlap
 MAX_SPAN = 9                 # years from first matriculation to last record
 MAX_SCHOOLS = 3
+U_SAMPLE_SEED = 1848         # seed for the random spell pairs that estimate u
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +120,7 @@ def stage_spells(con, annual):
     rows = con.sql("""
         SELECT rec_id, school, ln_phon, gn_i1, coalesce(location_id, -999) AS loc,
                first_year, gn_init, gn_tokens
-        FROM rec ORDER BY school, ln_phon, gn_i1, loc, first_year
+        FROM rec ORDER BY school, ln_phon, gn_i1, loc, first_year, rec_id
     """).fetchall()
 
     assign = {}
@@ -154,27 +157,50 @@ def stage_spells(con, annual):
     con.execute("CREATE OR REPLACE TABLE map(rec_id BIGINT, spell_id BIGINT)")
     con.executemany("INSERT INTO map VALUES (?,?)", list(assign.items()))
 
+    # Every aggregate breaks ties explicitly: any_value, arg_max and mode
+    # otherwise return whichever row DuckDB scans first.
     con.execute("""
         CREATE OR REPLACE TABLE spell AS
-        SELECT
-            m.spell_id,
-            any_value(r.school)                          AS school,
-            min(r.first_year)                            AS first_seen,
-            max(r.first_year)                            AS last_seen,
-            count(*)                                     AS n_rec,
-            -- consensus name: longest initial string, union of full tokens
-            arg_max(r.ln_norm, length(r.ln_norm))        AS ln_norm,
-            any_value(r.ln_phon)                         AS ln_phon,
-            coalesce(any_value(r.ln_particle), '')       AS ln_particle,
-            arg_max(r.gn_init, length(r.gn_init))        AS gn_init,
-            arg_max(r.gn_init_set, length(r.gn_init_set)) AS gn_init_set,
-            any_value(r.gn_i1)                           AS gn_i1,
-            list_distinct(flatten(list(r.gn_tokens)))    AS gn_tokens,
-            bool_or(r.gn_has_full)                       AS gn_has_full,
-            mode(r.location_id)                          AS location_id,
-            mode(r.field)                                AS field
-        FROM map m JOIN rec r USING (rec_id)
-        GROUP BY m.spell_id
+        WITH base AS (
+            SELECT
+                m.spell_id,
+                min(r.school)                                AS school,
+                min(r.first_year)                            AS first_seen,
+                max(r.first_year)                            AS last_seen,
+                count(*)                                     AS n_rec,
+                -- consensus name: longest initial string (ties alphabetical),
+                -- union of full tokens
+                first(r.ln_norm ORDER BY length(r.ln_norm) DESC NULLS LAST, r.ln_norm)
+                                                             AS ln_norm,
+                min(r.ln_phon)                               AS ln_phon,
+                coalesce(min(r.ln_particle), '')             AS ln_particle,
+                first(r.gn_init ORDER BY length(r.gn_init) DESC NULLS LAST, r.gn_init)
+                                                             AS gn_init,
+                first(r.gn_init_set ORDER BY length(r.gn_init_set) DESC NULLS LAST, r.gn_init_set)
+                                                             AS gn_init_set,
+                min(r.gn_i1)                                 AS gn_i1,
+                list_sort(list_distinct(flatten(list(r.gn_tokens)))) AS gn_tokens,
+                bool_or(r.gn_has_full)                       AS gn_has_full
+            FROM map m JOIN rec r USING (rec_id)
+            GROUP BY m.spell_id
+        ),
+        -- most frequent non-null value per spell; ties go to the smallest value
+        loc AS (
+            SELECT spell_id, first(location_id ORDER BY n DESC, location_id) AS location_id
+            FROM (SELECT m.spell_id, r.location_id, count(*) AS n
+                  FROM map m JOIN rec r USING (rec_id)
+                  WHERE r.location_id IS NOT NULL GROUP BY ALL)
+            GROUP BY spell_id
+        ),
+        fld AS (
+            SELECT spell_id, first(field ORDER BY n DESC, field) AS field
+            FROM (SELECT m.spell_id, r.field, count(*) AS n
+                  FROM map m JOIN rec r USING (rec_id)
+                  WHERE r.field IS NOT NULL GROUP BY ALL)
+            GROUP BY spell_id
+        )
+        SELECT base.*, loc.location_id, fld.field
+        FROM base LEFT JOIN loc USING (spell_id) LEFT JOIN fld USING (spell_id)
     """)
     con.execute("""
         ALTER TABLE spell ADD COLUMN gn_set VARCHAR;
@@ -311,26 +337,41 @@ def stage_compare(con, annual):
     print("[4] comparison vectors built")
 
 
-def stage_u(con, annual, n=3000):
+def stage_u(con, annual, n=3000, seed=U_SAMPLE_SEED):
     """Estimate u from RANDOM cross-school pairs.
 
     Estimating u from blocked pairs is the classic way to get a degenerate EM
     fit: blocking selects for agreement, so u is biased up, the Bayes factors
     collapse, and lambda runs away. Random pairs are non-matches with
     probability ~1, so their level frequencies are u directly.
+
+    The two samples of n spells are drawn with a fixed seed from the spell ids
+    in sorted order, so u -- and everything downstream -- is the same on every
+    run. (DuckDB's USING SAMPLE is unseeded, and even with REPEATABLE it depends
+    on scan order.)
     """
-    con.execute(f"""
+    ids = [s for (s,) in con.sql("SELECT spell_id FROM spell ORDER BY spell_id").fetchall()]
+    rng = random.Random(seed)
+    k = min(n, len(ids))
+    draws = [("a", s) for s in rng.sample(ids, k)] + [("b", s) for s in rng.sample(ids, k)]
+    con.execute(
+        "CREATE OR REPLACE TABLE u_draw AS SELECT unnest($1) AS side, unnest($2) AS spell_id",
+        [[side for side, _ in draws], [s for _, s in draws]],
+    )
+    con.execute("""
         CREATE OR REPLACE TABLE rnd AS
         SELECT a.spell_id AS lid, b.spell_id AS rid
-        FROM (SELECT spell_id, school FROM spell USING SAMPLE {n} ROWS) a
-        CROSS JOIN (SELECT spell_id, school FROM spell USING SAMPLE {n} ROWS) b
+        FROM (SELECT d.spell_id, s.school FROM u_draw d JOIN spell s USING (spell_id)
+              WHERE d.side = 'a') a
+        CROSS JOIN (SELECT d.spell_id, s.school FROM u_draw d JOIN spell s USING (spell_id)
+                    WHERE d.side = 'b') b
         WHERE a.spell_id < b.spell_id AND a.school <> b.school
     """)
     con.execute("CREATE OR REPLACE TABLE cmp_u AS "
                 + _compare_sql("rnd", annual, with_tf=False))
     rows = con.sql(f"""
         SELECT stratum, {', '.join(f for f, _ in FIELDS)}, count(*) AS n
-        FROM cmp_u GROUP BY ALL
+        FROM cmp_u GROUP BY ALL ORDER BY ALL
     """).fetchall()
     tot = con.sql("SELECT count(*) FROM cmp_u").fetchone()[0]
     print(f"[5a] u estimated from {tot:,} random cross-school pairs")
@@ -425,7 +466,8 @@ def seed_m(con, u_all, rare=2e-4):
     for fields, where in seeds.items():
         cols = ", ".join(fields)
         rows = con.sql(f"""
-            SELECT stratum, {cols}, count(*) AS n FROM cmp WHERE {where} GROUP BY ALL
+            SELECT stratum, {cols}, count(*) AS n FROM cmp WHERE {where}
+            GROUP BY ALL ORDER BY ALL
         """).fetchall()
         n_tot = sum(r[-1] for r in rows)
         print(f"[5b] seed [{where[:46]}...]  {n_tot:,} pairs -> m for {fields}")
@@ -455,7 +497,7 @@ def seed_m(con, u_all, rare=2e-4):
 def stage_em(con, u_all, n_links):
     rows = con.sql(f"""
         SELECT stratum, {', '.join(f for f, _ in FIELDS)}, count(*) AS n
-        FROM cmp GROUP BY ALL
+        FROM cmp GROUP BY ALL ORDER BY ALL
     """).fetchall()
     by = defaultdict(list)
     for r in rows:
@@ -582,7 +624,7 @@ class Clusters:
 def stage_cluster(con, threshold):
     spells = con.sql("SELECT spell_id, school, first_seen, last_seen FROM spell").fetchall()
     edges = con.sql(f"""
-        SELECT lid, rid, w FROM edge WHERE p >= {threshold} ORDER BY w DESC
+        SELECT lid, rid, w FROM edge WHERE p >= {threshold} ORDER BY w DESC, lid, rid
     """).fetchall()
     cl = Clusters(spells)
     kept = sum(cl.merge(a, b) for a, b, _ in edges)
@@ -794,6 +836,8 @@ def main():
     ap.add_argument("--annual", help="comma-separated schools with annual registers")
     ap.add_argument("--mean-schools", type=float, default=1.45,
                     help="mean universities per student; calibrate from prev_university")
+    ap.add_argument("--u-sample", type=int, default=3000,
+                    help="spells per side in the random pairs that estimate u")
     args = ap.parse_args()
 
     con = duckdb.connect()
@@ -802,7 +846,7 @@ def main():
     stage_spells(con, annual)
     stage_block(con)
     stage_compare(con, annual)
-    u_all = stage_u(con, annual)
+    u_all = stage_u(con, annual, n=args.u_sample)
     n_links = expected_links(con, args.mean_schools)
     params = stage_em(con, u_all, n_links)
     stage_score(con, params)
@@ -830,6 +874,7 @@ def main():
         con.execute(f"""COPY (
             SELECT r.*, m.spell_id, c.student_id
             FROM rec r JOIN map m USING (rec_id) JOIN cluster c USING (spell_id)
+            ORDER BY r.rec_id
         ) TO '{args.out}' (FORMAT PARQUET)""")
         print(f"\nwrote {args.out}")
 

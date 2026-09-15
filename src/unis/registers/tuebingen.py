@@ -25,7 +25,9 @@ def build() -> pl.LazyFrame:
             first_year=pl.col.years.str.extract(r"(\d{4})").cast(pl.Int64).fill_null(volume_year()),
             location_full=pl.col.hometown_full,
         )
-        .sort("first_year", "last_name", "first_names")
+        # Stable sort: rows tied on this key keep their register order, so row
+        # numbers (and the linkage record ids built on them) are reproducible.
+        .sort("first_year", "last_name", "first_names", maintain_order=True)
         .select(
             "last_name",
             "first_names",
