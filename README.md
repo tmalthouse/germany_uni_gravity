@@ -22,12 +22,6 @@ make                  # build everything
 make test             # unit tests
 ```
 
-The student map is drawn on N. G. Huntington's 1836 map of Europe (British
-Library), served by Old Maps Online. Its tile URL includes a personal account
-key, so copy `.env.example` to `.env` and put your key in; `.env` is gitignored.
-Without it the map falls back to the CARTO base map. The key ends up inside
-`student_map.html`, so share the PNG rather than the HTML.
-
 Make rebuilds only what is out of date: editing an analysis module reruns that
 analysis, editing a register cleaner reruns everything downstream of it. Useful
 partial targets are `make data`, `make tables`, `make figures` and `make map`.

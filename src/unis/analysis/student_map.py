@@ -8,18 +8,10 @@ round on the map. Places with one student get no jitter (log 1 = 0).
 The map opens on Germany with East Prussia; the interactive version can be
 panned and zoomed out from there.
 
-Base map: Nathaniel Gilbert Huntington's map of Europe (1836, British Library),
-served as XYZ tiles by Old Maps Online. The tile URL carries a personal account
-key, so it is read from the HISTORIC_BASEMAP_URL environment variable (the
-Makefile loads it from a gitignored .env; see .env.example) and never stored in
-the repository. Without it the map falls back to the CARTO base map. The key is
-embedded in the HTML output, so share the PNG rather than the HTML.
-
 students_final.parquet -> output/figures/student_map.html, output/figures/student_map.png
 """
 
 import math
-import os
 
 import numpy as np
 import plotly.express as px
@@ -37,19 +29,6 @@ WIDTH, HEIGHT = 1600, 1200  # figure size in pixels
 MARGIN = 10
 LEGEND_WIDTH = 170  # approximate space the legend takes beside the map
 TILE_SIZE = 512  # MapLibre renders the world 512 px wide at zoom 0
-
-BASEMAP_URL_ENV = 'HISTORIC_BASEMAP_URL'
-BASEMAP_OPACITY = 0.45  # faded so the points stay legible over the hand colouring
-BASEMAP_ATTRIBUTION = 'Base map: N. G. Huntington, 1836 (British Library), via Old Maps Online'
-
-# The map's schools (Munich's Landshut seat shares the `muenchen` school code).
-MAP_SCHOOLS = sorted(code for code in UNIVERSITY_NAMES if code != 'muenchen_old')
-# Plotly's Alphabet palette in school-code order, except Jena and Kiel, whose
-# pale yellow and light grey disappear on the historic map's pale ground.
-UNIVERSITY_COLOURS = {
-    UNIVERSITY_NAMES[code]: colour
-    for code, colour in zip(MAP_SCHOOLS, px.colors.qualitative.Alphabet)
-} | {'Jena': '#FEAF16', 'Kiel': '#325A9B'}
 
 
 def _mercator_y(lat: float) -> float:
@@ -74,17 +53,6 @@ def fit_view(west: float, east: float, south: float, north: float,
     return center, min(zoom_x, zoom_y)
 
 
-def basemap_layout(tile_url: str | None) -> dict:
-    """Layout settings for the historic tile base map, or CARTO when no URL is set."""
-    if not tile_url:
-        return dict(map_style='carto-positron')
-    return dict(
-        map_style='white-bg',
-        map_layers=[dict(below='traces', sourcetype='raster', source=[tile_url],
-                         opacity=BASEMAP_OPACITY, sourceattribution=BASEMAP_ATTRIBUTION)],
-    )
-
-
 def main() -> None:
     df = pl.read_parquet(paths.STUDENTS_FINAL).unique('spell_id')
     rng = np.random.default_rng(seed=SEED)
@@ -103,6 +71,8 @@ def main() -> None:
         pl.Series('lon', lons + scaled_noise_lon),
         pl.col.school.replace_strict(UNIVERSITY_NAMES).alias('University'),
     ])
+    # Legend in the order of the school codes, so each university keeps its colour.
+    legend_order = [UNIVERSITY_NAMES[s] for s in df['school'].unique().sort().to_list()]
 
     center, zoom = fit_view(**BOUNDS, width_px=WIDTH - 2 * MARGIN - LEGEND_WIDTH,
                             height_px=HEIGHT - 2 * MARGIN)
@@ -114,17 +84,15 @@ def main() -> None:
         hover_data=['hometown', 'region'],
         center=center,
         zoom=zoom,
-        color_discrete_map=UNIVERSITY_COLOURS,
-        category_orders={'University': [UNIVERSITY_NAMES[code] for code in MAP_SCHOOLS]},
+        color_discrete_sequence=px.colors.qualitative.Alphabet,
+        category_orders={'University': legend_order},
     )
     fig.update_traces(marker=dict(size=2.5, opacity=0.01), selector=dict(type='scattermap'))
-    tile_url = os.environ.get(BASEMAP_URL_ENV)
-    print(f'base map: {"historic (Huntington 1836)" if tile_url else "CARTO (set " + BASEMAP_URL_ENV + " for the historic map)"}')
     fig.update_layout(
         width=WIDTH, height=HEIGHT,
         margin=dict(l=MARGIN, r=MARGIN, t=MARGIN, b=MARGIN),
         legend=dict(itemsizing='constant'),
-        **basemap_layout(tile_url),
+        map_style='carto-positron',
     )
     for trace in fig.data:
         trace.marker.opacity = 1.0
