@@ -161,6 +161,26 @@ The figure is the flow-weighted mean origin distance by year and school
   −1.26 vs old universities' −2.00; Bonn only +0.18 (−1.82). (Note this −2.00
   is not the §1–2 baseline −1.37: this spec adds era FEs and the Berlin/Bonn
   interactions. They are different objects — do not quote them as one.)
+- *Is Berlin's reach about Berlin? (2026-09-15, `design_b_berlin_checks.py`)*
+  The static Berlin premium does not come from East Prussia, rural origins or
+  coarse geocoding. Without East and West Prussia it is +0.71 (SE 0.14);
+  without all eastern provinces (adding Posen and Silesia) +0.68 (0.15); for
+  mapped, non-eastern origins alone (by-region split) +0.77 (0.15). Small
+  origins (<10 students) send fewer students to Berlin but with the same
+  gradient (difference −0.11, p = 0.49). Berlin has far more coarse geocodes
+  than any other school — 27% of its spells are placed at a territory,
+  district or country point, against 3–5% at most schools, some far from
+  where students lived (Pommern at 361 km, Schlesien at 463 km) — yet keeping
+  only settlement-level geocodes makes the premium larger, not smaller:
+  +0.81 (0.11), or +0.89 (0.12) also without eastern and unmapped origins.
+  With same-state and same-polity controls it is +0.65 (0.14); adding
+  Berlin × same state, +0.57 (0.15), with Berlin's own border effect weaker
+  than the other universities' (−0.68, SE 0.29, p = 0.02). Part of the
+  premium is Prussia, but most of it is not, and Berlin is not mainly a
+  Prussian draw. Note that most of Berlin's apparent East/West Prussian
+  intake is two province-level geocodes (hometown "Berlin", region Pommern
+  or Ostpreußen), and its genuine East Prussian origins are towns (Danzig,
+  Königsberg, Elbing, Thorn), not rural hinterland.
 - Dynamic (gradients relative to the old universities' −2.00; eras 3/4/5 =
   1820s/30s/40s):
   - **Berlin** +0.69 / +0.76 / +0.77 (SE 0.13 / 0.14 / 0.16); equal-era

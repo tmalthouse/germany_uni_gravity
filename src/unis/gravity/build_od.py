@@ -141,20 +141,22 @@ def attach_covariates(od: pl.DataFrame, orig: pl.DataFrame) -> pl.DataFrame:
     return od
 
 
-def main() -> None:
-    df = pl.read_parquet(paths.STUDENTS_FINAL)
+def spell_sample(students: pl.DataFrame) -> pl.DataFrame:
+    """One row per enrollment spell, in the broad-Europe sample.
 
-    # One row per enrollment spell: some schools (e.g. Tübingen, Jena, Bonn,
-    # Berlin) record every semester of a spell, others only the first. Keep the
-    # first row per spell_id so flows are counted per enrollment spell, not per
-    # recorded semester (otherwise record-dense schools are overrepresented ~2x).
-    df = df.filter(pl.col.in_germany_broad).sort('first_year').unique(
+    Some schools (e.g. Tübingen, Jena, Bonn, Berlin) record every semester of a
+    spell, others only the first. Keep the first row per spell_id so flows are
+    counted per enrollment spell, not per recorded semester (otherwise
+    record-dense schools are overrepresented ~2x).
+    """
+    return students.filter(pl.col.in_germany_broad).sort('first_year').unique(
         subset='spell_id', keep='first', maintain_order=True
     )
 
-    # Origin: hometown place. Group duplicate TGN ids (same place, multiple
-    # students); keep modal coords and polity attributes per origin.
-    orig = (df
+
+def origin_table(df: pl.DataFrame) -> pl.DataFrame:
+    """Origins: hometown places, one row per TGN id, with coordinates and polity."""
+    return (df
             .group_by('location_id')
             .agg(
                 pl.col.hometown.first(),
@@ -166,11 +168,12 @@ def main() -> None:
                 pl.col.gis_year.mode().first().alias('gis_year_o'),
                 pl.len().alias('n_students_o'),
             ))
-    print(f'origins: {orig.height} unique hometown places')
 
-    # Destinations: 14 school_fixed labels (13 institutions; Munich splits into
-    # its Landshut and Munich seats at the 1826 move) with coordinates and polity.
-    dest = (df
+
+def destination_table(df: pl.DataFrame) -> pl.DataFrame:
+    """Destinations: the 14 school_fixed labels (13 institutions; Munich splits into
+    its Landshut and Munich seats at the 1826 move) with coordinates and polity."""
+    return (df
             .group_by('school_fixed')
             .agg(
                 pl.col.lat_uni.first(),
@@ -180,11 +183,14 @@ def main() -> None:
             )
             .rename({'school_fixed': 'dest'})
             .sort('dest'))
-    print(f'destinations: {dest.height} universities')
 
-    # Cross join origins x destinations x eras (zero-padded grid), then attach
-    # observed flows per (origin, dest, era). Era = decade of first enrollment
-    # (1 = 1800s ... 5 = 1840s), as defined in unis.finalize.
+
+def era_grid(df: pl.DataFrame, orig: pl.DataFrame, dest: pl.DataFrame) -> pl.DataFrame:
+    """Zero-padded origin x destination x era grid of spell flows, with covariates.
+
+    Era = decade of first enrollment (1 = 1800s ... 5 = 1840s), as defined in
+    unis.finalize.
+    """
     eras = df.select('era').unique().sort('era')
     grid = (orig.select('location_id', 'lat', 'lon', 'polity_o')
             .join(dest.select('dest', 'lat_uni', 'lon_uni', 'polity_d'), how='cross')
@@ -204,9 +210,17 @@ def main() -> None:
     od = grid.join(flows, on=['location_id', 'dest', 'era'], how='left')
     od = od.join(years, on=['location_id', 'dest', 'era'], how='left')
     od = od.with_columns(pl.col.flow.fill_null(0))
+    return attach_covariates(od, orig)
 
-    od = attach_covariates(od, orig)
 
+def main() -> None:
+    df = spell_sample(pl.read_parquet(paths.STUDENTS_FINAL))
+    orig = origin_table(df)
+    print(f'origins: {orig.height} unique hometown places')
+    dest = destination_table(df)
+    print(f'destinations: {dest.height} universities')
+
+    od = era_grid(df, orig, dest)
     paths.OD.parent.mkdir(parents=True, exist_ok=True)
     od.write_parquet(paths.OD)
     print(f'wrote {paths.OD}: {od.shape}')
