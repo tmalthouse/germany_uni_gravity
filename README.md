@@ -74,7 +74,7 @@ caption, label, notes and float live in the paper:
 \begin{table}
   \centering
   \caption{...}\label{tab:gravity}
-  \input{output/tables/gravity_results.tex}
+  \input{output/tables/gravity_structure.tex}
 \end{table}
 ```
 
