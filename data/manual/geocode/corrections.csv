@@ -1,0 +1,161 @@
+raw,canonical,context,category,needs_review,reason
+Frankfurt a. M.,Frankfurt am Main,Hessen,orthography,0,abbreviation
+Frankfurt a/M.,Frankfurt am Main,Hessen,orthography,0,abbreviation
+Frankfurt a. M,Frankfurt am Main,Hessen,orthography,0,abbreviation
+Frankfurt/M.,Frankfurt am Main,Hessen,orthography,0,abbreviation
+Frankfurth,Frankfurt am Main,Hessen,orthography,1,bare 'Frankfurth' is ambiguous between Main and Oder; inherited from the old dictionary
+"Frankfurt a. M., Mittelmark",Frankfurt an der Oder,Brandenburg,historic_name,1,"CHANGED from the old dictionary: Mittelmark is in Brandenburg, which points at the Oder, not the Main"
+Frankfurt a. d. O.,Frankfurt an der Oder,Brandenburg,orthography,0,abbreviation
+Kurhessen,Kassel,Hessen,territory_seat,0,"Electorate of Hesse, seat Kassel"
+Churhessen,Kassel,Hessen,territory_seat,0,"Electorate of Hesse, seat Kassel"
+Hessen-Cassel,Kassel,Hessen,territory_seat,0,seat
+Hessen-Kassel,Kassel,Hessen,territory_seat,0,seat
+Cassellanus,Kassel,Hessen,orthography,0,Latin adjectival form
+Niederhessen,Kassel,Hessen,territory_seat,1,"CHANGED from the old dictionary, which sent this to 'Hessen'; Lower Hesse is the Kassel region"
+Hessen Darmstadt,Darmstadt,Hessen,territory_seat,0,seat
+Hessen-Darmstadt,Darmstadt,Hessen,territory_seat,0,seat
+Gieszen,Gießen,Hessen,orthography,0,sz digraph
+Hannov.,Hannover,Niedersachsen,orthography,0,truncation
+Hann.,Hannover,Niedersachsen,orthography,0,truncation
+Hannöversch.,Hannover,Niedersachsen,orthography,0,adjectival truncation
+Hannöverschen,Hannover,Niedersachsen,orthography,0,adjectival form
+Königreich Hannover,Hannover,Niedersachsen,territory_seat,0,seat
+Braunschw.,Braunschweig,Niedersachsen,orthography,0,truncation
+Harz-Dept.,Heiligenstadt,Thüringen,department_seat,1,"Kingdom of Westphalia, Harz department; chef-lieu Heiligenstadt. Verify against GOV"
+Leine-Dept.,Göttingen,Niedersachsen,department_seat,1,"Leine department, chef-lieu Göttingen. Verify against GOV"
+Oker-Dept.,Braunschweig,Niedersachsen,department_seat,1,"Oker department, chef-lieu Braunschweig. Verify against GOV"
+Ocker-Dept.,Braunschweig,Niedersachsen,department_seat,1,spelling variant of Oker
+Okerdepartement,Braunschweig,Niedersachsen,department_seat,1,as above
+Aller-Dept.,Hannover,Niedersachsen,department_seat,1,"Aller department, chef-lieu Hannover. Verify against GOV"
+Fulda-Dept.,Kassel,Hessen,department_seat,1,"Fulda department, chef-lieu Kassel. Verify against GOV"
+Saal-Dept.,Halberstadt,Sachsen-Anhalt,department_seat,1,"Saale department, chef-lieu Halberstadt. Verify against GOV"
+Werra-Dept.,Marburg,Hessen,department_seat,1,"Werra department, chef-lieu Marburg. Verify against GOV"
+Elb-Dept.,Magdeburg,Sachsen-Anhalt,department_seat,1,"Elbe department, chef-lieu Magdeburg. Verify against GOV"
+Tondern,Tønder,,historic_name,0,German name of Danish town
+Sonderburg,Sønderborg,,historic_name,0,German name of Danish town
+Augustenburg,Augustenborg,,historic_name,0,German name of Danish town
+Tönningen,Tönning,Schleswig-Holstein,orthography,0,variant
+Ploen,Plön,Schleswig-Holstein,orthography,0,oe digraph
+Oldesloe,Bad Oldesloe,Schleswig-Holstein,historic_name,0,later Bad prefix
+Herzogthum Schleswig,Schleswig,Schleswig-Holstein,territory_seat,0,seat
+Liefland,Livland,,historic_name,0,variant
+Lievland,Livland,,historic_name,0,variant
+Ehstland,Estland,,orthography,0,variant
+Neu-Vorpommern,Neuvorpommern,,orthography,0,hyphenation
+Mecklenburg Schwerin,Schwerin,Mecklenburg-Vorpommern,territory_seat,0,seat
+Mecklenburg-Schwerin,Schwerin,Mecklenburg-Vorpommern,territory_seat,1,"CHANGED: seat rather than the duchy, per the seat-for-territories decision"
+Meckl. Schwerin,Schwerin,Mecklenburg-Vorpommern,territory_seat,0,seat
+Mecklenb.-Schwerin,Schwerin,Mecklenburg-Vorpommern,territory_seat,0,seat
+Mecklenburg Strelitz,Neustrelitz,Mecklenburg-Vorpommern,territory_seat,1,CHANGED: seat of Mecklenburg-Strelitz is Neustrelitz
+Mecklenb.,Mecklenburg,Mecklenburg-Vorpommern,orthography,0,truncation
+Mecklenb,Mecklenburg,Mecklenburg-Vorpommern,orthography,0,truncation
+Meklenburg,Mecklenburg,Mecklenburg-Vorpommern,orthography,0,variant
+Priegnitz,Prignitz,Brandenburg,orthography,0,variant
+Lippe-Detmold,Detmold,Nordrhein-Westfalen,territory_seat,1,CHANGED: seat rather than the principality
+Lippe Detmold,Detmold,Nordrhein-Westfalen,territory_seat,0,seat
+Schaumburg Lippe,Bückeburg,Niedersachsen,territory_seat,1,CHANGED: seat of Schaumburg-Lippe is Bückeburg
+Schaumburg-Lippe,Bückeburg,Niedersachsen,territory_seat,1,seat
+Schwarzb,Schwarzburg,,orthography,0,truncation
+Schwarzburg Rudolstadt,Rudolstadt,Thüringen,territory_seat,0,seat
+Schwarzburg-Rudolstadt,Rudolstadt,Thüringen,territory_seat,1,seat
+Schwarzburg Sondershausen,Sondershausen,Thüringen,territory_seat,0,seat
+Schwarzburg-Sondershausen,Sondershausen,Thüringen,territory_seat,1,seat
+Amt Gehren,Gehren,Thüringen,orthography,0,administrative prefix
+Fürstenthum Waldeck,Arolsen,Hessen,territory_seat,1,CHANGED: seat of Waldeck is Arolsen (Bad Arolsen)
+Corbach,Korbach,Hessen,orthography,0,c/k
+Reußenl,Reuß,,orthography,0,truncation
+Zweybrücken,Zweibrücken,Rheinland-Pfalz,orthography,0,y/i
+Speier,Speyer,Rheinland-Pfalz,orthography,0,variant
+Rheinbaiern,Pfalz,,historic_name,0,Bavarian Rhine Palatinate
+Grossherzogthum Berg,Düsseldorf,Nordrhein-Westfalen,territory_seat,1,CHANGED: seat of the Grand Duchy of Berg is Düsseldorf
+Herzogthum Berg,Düsseldorf,Nordrhein-Westfalen,territory_seat,1,seat
+Coeln,Köln,Nordrhein-Westfalen,orthography,0,"c/k, oe digraph"
+St. Goar,Sankt Goar,Rheinland-Pfalz,orthography,0,abbreviation
+Maynz,Mainz,Rheinland-Pfalz,orthography,0,y/i
+Herfort,Herford,Nordrhein-Westfalen,orthography,0,variant
+Baaden,Baden,Baden-Württemberg,orthography,0,doubled vowel
+Freiburg i. B.,Freiburg im Breisgau,Baden-Württemberg,orthography,0,abbreviation
+Heidelbergensis,Heidelberg,Baden-Württemberg,orthography,0,Latin adjectival form
+Wirzburg,Würzburg,Bayern,orthography,0,variant
+Wirceburgensis,Würzburg,Bayern,orthography,0,Latin adjectival form
+Heydingsfeld,Heidingsfeld,Bayern,orthography,0,y/i
+Schwäb. Hall,Schwäbisch Hall,Baden-Württemberg,orthography,0,truncation
+Oehringen,Öhringen,Baden-Württemberg,orthography,0,oe digraph
+Feuchtwang,Feuchtwangen,Bayern,orthography,0,truncation
+Kadolzburg,Cadolzburg,Bayern,orthography,0,c/k
+Kissingen,Bad Kissingen,Bayern,historic_name,0,later Bad prefix
+Stuttgardt,Stuttgart,Baden-Württemberg,orthography,0,dt ending
+Fuld,Fulda,Hessen,orthography,0,truncation
+Salzungen,Bad Salzungen,Thüringen,historic_name,0,later Bad prefix
+Ohrdruff,Ohrdruf,Thüringen,orthography,0,doubled consonant
+Buttstedt,Buttstädt,Thüringen,orthography,0,variant
+Cahla,Kahla,Thüringen,orthography,0,c/k
+"Grossbrembach, Wm",Großbrembach,Thüringen,orthography,0,trailing qualifier 'Wm' presumed Weimar
+Herzogthum Nassau,Wiesbaden,Hessen,territory_seat,1,CHANGED: seat of the Duchy of Nassau is Wiesbaden
+Langenschwalbach,Bad Schwalbach,Hessen,historic_name,0,renamed 1927
+Umstadt,Groß-Umstadt,Hessen,historic_name,0,variant
+Prov. Sachsen,Provinz Sachsen,,orthography,0,truncation
+Preuss.,Preußen,,orthography,0,truncation
+Westphal.,Westfalen,,orthography,0,"ph/f, truncation"
+Großh. Posen,Posen,Polska,territory_seat,0,seat shares the name
+Großherzogtum Posen,Posen,Polska,territory_seat,0,seat shares the name
+Greifenberg in Schles.,Greifenberg in Schlesien,,orthography,0,truncation
+Schweitz,Schweiz,,orthography,0,variant
+Herzogthum Bremen,Bremen,Bremen,territory_seat,0,seat shares the name
+Bremischen,Bremen,,orthography,0,adjectival form
+Wandsbeck,Wandsbek,Hamburg,orthography,0,ck/k
+Meurs,Moers,Nordrhein-Westfalen,historic_name,0,variant
+Oldenb,Oldenburg,Niedersachsen,orthography,0,truncation
+Neuhornbach,Hornbach,Rheinland-Pfalz,historic_name,1,inherited from the old dictionary; not independently verified
+Neunburg,Neunburg vorm Wald,Bayern,historic_name,0,disambiguating suffix
+Mayenfeld,Maienfeld,,orthography,0,y/i
+Berncastel,Bernkastel-Kues,Rheinland-Pfalz,historic_name,0,"c/k, later merger"
+Wm,Weimar,Thüringen,abbreviation,1,"review queue: 309 students; abbreviation also seen in 'Grossbrembach, Wm'"
+Weim,Weimar,Thüringen,abbreviation,1,review queue: 259 students
+Altb,Altenburg,Thüringen,abbreviation,1,review queue: 241 students
+Prß,Preußen,,abbreviation,1,review queue: 219 students
+Preuszen,Preußen,,orthography,0,sz digraph
+Goth,Gotha,Thüringen,abbreviation,1,"review queue: 277 students; was matching 'Goth' at 5,286 km"
+Meckl,Mecklenburg,Mecklenburg-Vorpommern,abbreviation,0,truncation without the period
+Mittelmark,Potsdam,Brandenburg,territory_seat,1,"review queue: 2,691 students; was matching Middlemarch, New Zealand at 18,158 km"
+Rheinlande,Koblenz,Rheinland-Pfalz,territory_seat,1,seat of the Rheinprovinz
+Prov. Rheinlande,Koblenz,Rheinland-Pfalz,territory_seat,1,"review queue: 354 students; was matching Ramilândia, Brazil"
+Provinz Rheinlande,Koblenz,Rheinland-Pfalz,territory_seat,1,review queue: 279 students
+Rheinpreußen,Koblenz,Rheinland-Pfalz,territory_seat,1,"review queue: 1,382 students unresolved; 'Rheinprovinz' is not a TGN term"
+Rheinpreussen,Koblenz,Rheinland-Pfalz,territory_seat,1,as above
+Schwedisch Pommern,Stralsund,Mecklenburg-Vorpommern,territory_seat,1,'Schwedisch-Pommern' is not a TGN term; Stralsund was the capital
+Schwedisch Pomm.,Stralsund,Mecklenburg-Vorpommern,territory_seat,1,as above
+Privatunterricht,,,exclusion,0,"means private tuition, not a place"
+a. M.,,,exclusion,1,"review queue: 369 students; a bare river qualifier with no town attached. Probably means Frankfurt but that is not recoverable from the string alone, and it was resolving to 'A M B Lateral' at 8,423 km"
+Freiburg,Freiburg im Breisgau,Baden-Württemberg,disambiguation,1,"bare 'Freiburg' in a German register means the Breisgau city (the Swiss city is written 'Freiburg Schweiz' when meant); needs_review: 5 students with region='Schweiz' almost certainly mean Fribourg CH and are collateral here"
+Freiburg Schweiz,Fribourg,Switzerland,disambiguation,0,"register explicitly says Schweiz; without this the string matched the Bahnhof Freiburg-Wiehre, a railway station in the German Freiburg"
+Freiburg i. Br.,Freiburg im Breisgau,Baden-Württemberg,orthography,0,abbreviation like the existing i. B. entry
+Freiburg i Br,Freiburg im Breisgau,Baden-Württemberg,orthography,0,as above without punctuation
+Westpreußen,Danzig,Pomeranian Voivodeship,territory_seat,0,"Prussian province; TGN holds no bare 'Westpreussen' subject (only 'Marienburg in Westpreussen' etc.), so the string fell to fuzzy and matched Westerhausen, a Saxony-Anhalt village, for 1,037 students. Danzig was the capital"
+Westpreussen,Danzig,Pomeranian Voivodeship,territory_seat,0,ascii spelling of the above
+Westpreuss.,Danzig,Pomeranian Voivodeship,territory_seat,0,abbreviated spelling of the above
+Rheinkreis,Speyer,Rheinland-Pfalz,territory_seat,0,"the Bavarian Rhine Circle (Rheinkreis) is the Palatinate; TGN has no such term and the phonetic rung matched Rehaincourt in the Vosges. Speyer was the government seat"
+bair. Rheinkreis,Speyer,Rheinland-Pfalz,territory_seat,0,as above with the Bavarian qualifier
+bayr. Rheinkreis,Speyer,Rheinland-Pfalz,territory_seat,0,as above
+Oldenb.,Oldenburg,Niedersachsen,orthography,0,"abbreviation; without this the phonetic rung matched Holdenby/Aldenby in England"
+Oldenbg.,Oldenburg,Niedersachsen,orthography,0,as above
+Westph.,Westphalen,Nordrhein-Westfalen,orthography,0,"abbreviation; phonetic margin 0.27 against unrelated villages"
+Westph,Westphalen,Nordrhein-Westfalen,orthography,0,as above
+Pr.,Preußen,Germany,orthography,1,"bare abbreviation in a German register means Preußen; needs_review: could rarely mean Posen province or 'parish', but 62 students and the phonetic match was Praha"
+Brschw,Braunschweig,Niedersachsen,orthography,0,"abbreviation; phonetic matched Brashov in Romania"
+Meckl.,Mecklenburg,Mecklenburg-Vorpommern,orthography,0,"abbreviation; phonetic matched 'Nueckel'"
+Meckl. Strelitz,Neustrelitz,Mecklenburg-Vorpommern,territory_seat,0,"Mecklenburg-Strelitz abbreviations; seat was Neustrelitz"
+Mecklb. Strelitz,Neustrelitz,Mecklenburg-Vorpommern,territory_seat,0,as above
+Mecklenb. Strelitz,Neustrelitz,Mecklenburg-Vorpommern,territory_seat,0,as above
+Württemberger,Württemberg,Baden-Württemberg,disambiguation,0,"demonym; resolves to the territory itself"
+Würtemberger,Württemberg,Baden-Württemberg,disambiguation,0,archaic spelling of the demonym
+O.A. Gmünd,Schwäbisch Gmünd,Baden-Württemberg,orthography,0,"'O.A.' = Oberamt; the bare string matched small Gmünds elsewhere"
+O.A. Gmünd Württemberg,Schwäbisch Gmünd,Baden-Württemberg,orthography,0,as above without comma
+"O.A. Gmünd, Württemberg",Schwäbisch Gmünd,Baden-Württemberg,orthography,0,comma-separated variant
+Stadtsulza,Bad Sulza,Thüringen,orthography,0,"historical name of Bad Sulza (Weimar lay too near and won on the old fuzzy match)"
+Stadt-Sulza,Bad Sulza,Thüringen,orthography,0,hyphenated variant
+Eif,,,exclusion,0,"truncation of 'Eifel' region; TGN has no bare Eifel subject, so it cannot be corrected. The 45 students resolve through their other field"
+Inländer,,,exclusion,0,"means domestic students, not a place"
+Inländer Württemberg,,,exclusion,0,"same, with a region qualifier"
+"Inländer, Württemberg",,,exclusion,0,comma-separated variant
+Insel Rügen,Bergen auf Rügen,Mecklenburg-Vorpommern,disambiguation,0,"the island itself has no TGN subject; assigned to its chief town and county seat, which the gazetteer holds (7017181)"
