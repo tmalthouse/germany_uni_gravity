@@ -5,6 +5,17 @@ import polars as pl
 from unis.registers.common import location_full, scan_volumes, volume_year
 
 
+def field_flags() -> dict[str, pl.Expr]:
+    """Field groups from the register's abbreviations ('J.', 'Th.', 'M.', ...)."""
+    return dict(
+        law_admin=pl.col.field.is_in(["J.", "Cam.", "J.u.C.", "J. u. C."]),
+        theology=pl.col.field.is_in(["T.", "Th.", "T. u. P.", "T.u.P."]),
+        medicine=pl.col.field.is_in(["M.", "Pm.", "Ph.", "Chir."]),
+        sciences=pl.col.field.is_in(["Math."]),
+        humanities=pl.col.field.is_in(["P.", "Oec.", "Phil.", "Phll."]),
+    )
+
+
 def build() -> pl.LazyFrame:
     return (
         # 'jona' catches volumes whose id the extractor misread.
@@ -32,4 +43,5 @@ def build() -> pl.LazyFrame:
             "region",
             "address",
         )
+        .with_columns(**field_flags())
     )

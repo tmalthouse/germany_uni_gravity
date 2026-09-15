@@ -5,6 +5,18 @@ import polars as pl
 from unis.registers.common import scan_volumes, volume_year
 
 
+def field_flags() -> dict[str, pl.Expr]:
+    """Field groups from the register's field names, punctuation stripped."""
+    field = pl.col.field.str.replace_all(r"\W", "")
+    return dict(
+        law_admin=field.str.contains(r"(Rechts|Cameral|Staats)"),
+        theology=field.str.contains(r"(Theol|theol|Théol)"),
+        medicine=field.str.contains(r"(Med|Medicin|Chirur|Pharm)"),
+        sciences=field.str.contains("Forstwissenschaft"),
+        humanities=field.str.contains(r"(Phil)"),
+    )
+
+
 def build() -> pl.LazyFrame:
     return (
         # Field is forward-filled within each volume, never across volumes.
@@ -23,4 +35,5 @@ def build() -> pl.LazyFrame:
             "hometown",
             "region",
         )
+        .with_columns(**field_flags())
     )

@@ -211,10 +211,15 @@ The figure is the flow-weighted mean origin distance by year and school
   ~10⁵) due to collinearity with dest FEs — never quote them. Bonn's era-1/2
   terms look precise (≈ −16.6, SE ≈ 0.1) but are equally meaningless: they are
   fit to pre-founding zeros.
-- Field composition is untestable (fields unrecorded at Berlin/Bonn/
-  Tübingen/Jena); the Heidelberg proxy analyses
-  (`heidelberg_tests.py`, `robustness_student_religion.py`) are directional
-  support only. Heidelberg religion is the only student-level religion data.
+- ⚠ *Correction (2026-09-14):* this caveat used to read "field composition
+  is untestable (fields unrecorded at Berlin/Bonn/Tübingen/Jena)". The fields
+  are recorded; the register cleaners computed the field groups for these four
+  schools only on intermediate tables that were never used, so `field` was
+  null there. It is now populated (see README, "Fixes since the port"). Field
+  composition at the new universities has not been analysed yet; until it is,
+  the Heidelberg proxy analyses (`heidelberg_tests.py`,
+  `robustness_student_religion.py`) are directional support only. Heidelberg
+  religion is the only student-level religion data.
   ⚠ Corrections to those analyses (2026-09-14):
   - Both scripts used **Tübingen's coordinates** for Heidelberg (101 km off;
     11% of students on the wrong side of the 300 km line). Corrected

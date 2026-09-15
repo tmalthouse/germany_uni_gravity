@@ -2,7 +2,25 @@
 
 import polars as pl
 
+from unis.mappings.register_fields import FIELD_MAPPING_BERLIN
 from unis.registers.common import DITTO_MARKS, location_full, scan_volumes, volume_year
+
+
+def field_flags() -> dict[str, pl.Expr]:
+    """Field groups from the register's abbreviations ('Theol.', 'Kam.', ...).
+
+    Abbreviations missing from FIELD_MAPPING_BERLIN get no group.
+    """
+    field = pl.col.field.str.replace_all(r"\W", "").replace_strict(
+        FIELD_MAPPING_BERLIN, default=None
+    )
+    return dict(
+        law_admin=field.is_in(["Kam", "Recht", "Rechte"]),
+        theology=field == "Theol",
+        medicine=field == "Med",
+        sciences=field.is_in(["Mineral", "Math", "Naturw"]),
+        humanities=field.is_in(["Phil"]),
+    )
 
 
 def build() -> pl.LazyFrame:
@@ -30,4 +48,5 @@ def build() -> pl.LazyFrame:
             "region",
             "address",
         )
+        .with_columns(**field_flags())
     )

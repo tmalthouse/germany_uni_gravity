@@ -156,15 +156,21 @@ files in `~/Dropbox/1848_unis` (2026-09-14):
 - Headline numbers in `docs/findings.md` (Göttingen path, Design B Wald tests,
   Heidelberg religion PPML, placebo summary) reproduce as written.
 
+## Fixes since the port
+
+Each fix is its own commit, and its message records the effect on results.
+
+- **Field groups for Berlin, Bonn, Jena and Tübingen.** The original cleaners
+  computed the `law_admin`…`humanities` flags for these schools only on
+  per-student summary tables that were never used, so `field` was null there
+  although the raw field is recorded. The cleaners now apply those same rules
+  to every row. Of the rows with a recorded field, the share that now gets a
+  group: Berlin 100%, Bonn 99.5%, Jena 97.4%, Tübingen 99.0%. No gravity
+  analysis uses `field`, so tables and figures are unchanged.
+
 ## Known issues carried over unchanged
 
-This is a behaviour-preserving port. These issues are left as they were, so
-they can be fixed one at a time with their effect on results visible.
+These issues from the original are left as they were.
 
-- **No field groups for Berlin, Bonn, Jena and Tübingen.** Their raw field is
-  recorded (`field_raw`, 93–100% of rows). The original cleaners computed the
-  `law_admin`…`humanities` flags only on per-student summary tables that were
-  never used, so `field` is null for these four schools. Findings §4–5
-  describes fields there as unrecorded; they are recorded but unclassified.
 - **Unmapped origin confession is `''`, not `unknown`** (findings, Data).
 - **Linkage u-sampling is unseeded** (above).

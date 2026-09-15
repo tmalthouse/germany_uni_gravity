@@ -2,7 +2,23 @@
 
 import polars as pl
 
+from unis.mappings.register_fields import FIELD_MAPPING_BONN
 from unis.registers.common import DITTO_MARKS, location_full, scan_volumes, volume_year
+
+
+def field_flags() -> dict[str, pl.Expr]:
+    """Field groups from the register's field names, standardised by FIELD_MAPPING_BONN.
+
+    A student may study several fields ('Jura; Kam'); each matching group is set.
+    """
+    field = pl.col.field.replace(FIELD_MAPPING_BONN)
+    return dict(
+        law_admin=field.str.contains(r"(Jura|Kam|Staatsw)"),
+        theology=field.str.contains(r"(Theol)"),
+        medicine=field.str.contains(r"(Med|Chir|Pharm)"),
+        sciences=field.str.contains(r"(Math|Physik|Berge|Naturw|Forstw)"),
+        humanities=field.str.contains(r"(Phil|Philol|Geschichte|Lit)"),
+    )
 
 
 def build() -> pl.LazyFrame:
@@ -29,4 +45,5 @@ def build() -> pl.LazyFrame:
             "region",
             "address",
         )
+        .with_columns(**field_flags())
     )
