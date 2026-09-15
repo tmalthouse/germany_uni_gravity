@@ -30,6 +30,15 @@ MARGIN = 10
 LEGEND_WIDTH = 170  # approximate space the legend takes beside the map
 TILE_SIZE = 512  # MapLibre renders the world 512 px wide at zoom 0
 
+# The map's schools (Munich's Landshut seat shares the `muenchen` school code).
+MAP_SCHOOLS = sorted(code for code in UNIVERSITY_NAMES if code != 'muenchen_old')
+# Plotly's Alphabet palette in school-code order, except Jena and Kiel, whose
+# pale yellow and light grey are hard to see on the pale base map.
+UNIVERSITY_COLOURS = {
+    UNIVERSITY_NAMES[code]: colour
+    for code, colour in zip(MAP_SCHOOLS, px.colors.qualitative.Alphabet)
+} | {'Jena': '#FEAF16', 'Kiel': '#325A9B'}
+
 
 def _mercator_y(lat: float) -> float:
     return math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
@@ -71,8 +80,6 @@ def main() -> None:
         pl.Series('lon', lons + scaled_noise_lon),
         pl.col.school.replace_strict(UNIVERSITY_NAMES).alias('University'),
     ])
-    # Legend in the order of the school codes, so each university keeps its colour.
-    legend_order = [UNIVERSITY_NAMES[s] for s in df['school'].unique().sort().to_list()]
 
     center, zoom = fit_view(**BOUNDS, width_px=WIDTH - 2 * MARGIN - LEGEND_WIDTH,
                             height_px=HEIGHT - 2 * MARGIN)
@@ -84,8 +91,8 @@ def main() -> None:
         hover_data=['hometown', 'region'],
         center=center,
         zoom=zoom,
-        color_discrete_sequence=px.colors.qualitative.Alphabet,
-        category_orders={'University': legend_order},
+        color_discrete_map=UNIVERSITY_COLOURS,
+        category_orders={'University': [UNIVERSITY_NAMES[code] for code in MAP_SCHOOLS]},
     )
     fig.update_traces(marker=dict(size=2.5, opacity=0.01), selector=dict(type='scattermap'))
     fig.update_layout(

@@ -2,7 +2,20 @@ import math
 
 import pytest
 
-from unis.analysis.student_map import TILE_SIZE, fit_view
+from unis.analysis.student_map import MAP_SCHOOLS, TILE_SIZE, UNIVERSITY_COLOURS, fit_view
+from unis.gravity.constants import UNIVERSITY_NAMES
+
+
+def test_every_map_university_has_its_own_colour():
+    names = {UNIVERSITY_NAMES[code] for code in MAP_SCHOOLS}
+    assert set(UNIVERSITY_COLOURS) == names
+    assert len(set(UNIVERSITY_COLOURS.values())) == len(names)
+
+
+def test_jena_and_kiel_avoid_the_pale_palette_entries():
+    pale = {"#F7E1A0", "#E2E2E2"}
+    assert UNIVERSITY_COLOURS["Jena"] not in pale
+    assert UNIVERSITY_COLOURS["Kiel"] not in pale
 
 
 def test_whole_world_width_fits_at_zoom_zero():
