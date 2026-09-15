@@ -1,6 +1,43 @@
 import math
 
-from unis.latex import Tabular, escape, integer, multicolumn, num, pvalue, se, stars
+import pandas as pd
+
+from unis.latex import (
+    Tabular,
+    escape,
+    integer,
+    multicolumn,
+    num,
+    pvalue,
+    regression_table,
+    se,
+    stars,
+)
+
+
+def test_regression_table_leaves_missing_terms_blank():
+    tidy = lambda rows: pd.DataFrame(  # noqa: E731
+        rows, columns=["Coefficient", "Estimate", "Std. Error", "Pr(>|t|)"]
+    ).set_index("Coefficient")
+    m1 = tidy([("x", -0.5, 0.1, 0.001)])
+    m2 = tidy([("x", 0.2, 0.3, 0.5), ("z", 1.0, 0.4, 0.02)])
+    lines = regression_table(
+        ["A", "B"], [m1, m2], [("X", ["x", "x"]), ("Z", [None, "z"])],
+        footer=[("Observations", ["10", "12"])],
+    ).render().splitlines()
+    assert lines[2:] == [
+        r" & (1) & (2) \\",
+        r" & A & B \\",
+        r"\midrule",
+        r"X & $-$0.500$^{***}$ & 0.200 \\",
+        r" & (0.100) & (0.300) \\",
+        r"Z &  & 1.000$^{**}$ \\",
+        r" &  & (0.400) \\",
+        r"\midrule",
+        r"Observations & 10 & 12 \\",
+        r"\bottomrule",
+        r"\end{tabular}",
+    ]
 
 
 def test_pvalue():

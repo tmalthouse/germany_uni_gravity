@@ -111,3 +111,40 @@ class Tabular:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(self.render(), encoding="utf-8")
         print(f"wrote {path}")
+
+
+def regression_table(
+    headers: list[str],
+    tidies: list,
+    rows: list[tuple[str, list[str | None]]],
+    footer: list[tuple[str, list[str]]] = (),
+    numbered: bool = True,
+) -> Tabular:
+    """One column per model: estimate with stars, standard error beneath.
+
+    `tidies` are pyfixest ``fit.tidy()`` frames (indexed by coefficient name).
+    Each row names the coefficient to show in each column, or None where the
+    model has no such term. Footer rows give one cell per column.
+    """
+    k = len(tidies)
+    t = Tabular("l" + "c" * k)
+    if numbered:
+        t.row("", *[f"({i})" for i in range(1, k + 1)])
+    t.row("", *headers).midrule()
+    for label, names in rows:
+        estimates, errors = [], []
+        for tidy, name in zip(tidies, names):
+            if name is None or name not in tidy.index:
+                estimates.append("")
+                errors.append("")
+                continue
+            r = tidy.loc[name]
+            estimates.append(num(r["Estimate"]) + stars(r["Pr(>|t|)"]))
+            errors.append(se(r["Std. Error"]))
+        t.row(label, *estimates)
+        t.row("", *errors)
+    if footer:
+        t.midrule()
+        for label, values in footer:
+            t.row(label, *values)
+    return t

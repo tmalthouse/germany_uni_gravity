@@ -11,7 +11,8 @@ grid, Berlin and Bonn split:
 
 plus the flow-weighted mean origin distance by year and school (year grid).
 
-od.parquet, od_year.parquet -> output/figures/design_b_composition.png
+od.parquet, od_year.parquet -> output/figures/design_b_composition.png,
+                               output/tables/design_b_composition.tex
 """
 
 import matplotlib.pyplot as plt
@@ -21,8 +22,36 @@ import pyfixest as pf
 import seaborn as sns
 
 from unis import paths
-from unis.gravity.constants import NEW_UNIVERSITIES as NEW
+from unis.gravity.constants import ERA_LABELS, NEW_UNIVERSITIES as NEW
+from unis.latex import integer, pvalue, regression_table
 from unis.plotting import save, set_style
+
+DYNAMIC_ERAS = (3, 4, 5)  # Berlin and Bonn have no students before era 3
+
+
+def write_tex(static, dynamic, equal_era_p: dict[str, float], path) -> None:
+    """Static and by-era distance gradients, relative to the old universities.
+
+    The static model's Berlin/Bonn era dummies are fit to pre-founding zeros
+    and numerically degenerate (findings §4-5), so they are indicated, not shown.
+    """
+    rows = [('Log distance', ['log_dist', 'log_dist'])]
+    for school, name in (('berlin', 'Berlin'), ('bonn', 'Bonn')):
+        rows.append((rf'{name} $\times$ log distance', [f'is_{school}:log_dist', None]))
+        rows += [(rf'{name} $\times$ log distance $\times$ {ERA_LABELS[e]}',
+                  [None, f'is_{school}:log_dist:C(era)[{e}]']) for e in DYNAMIC_ERAS]
+    rows.append(('Same city', ['same_city', 'same_city']))
+    regression_table(['Static', 'By era'], [static.tidy(), dynamic.tidy()], rows, footer=[
+        (r'Berlin gradients equal across eras, $p$', ['', pvalue(equal_era_p['berlin'])]),
+        (r'Bonn gradients equal across eras, $p$', ['', pvalue(equal_era_p['bonn'])]),
+        ('Observations', [integer(static._N), integer(dynamic._N)]),
+        (r'Berlin, Bonn $\times$ era', ['Yes', '']),
+        ('Origin FE', ['Yes', 'Yes']),
+        ('Destination FE', ['Yes', '']),
+        ('Era FE', ['Yes', '']),
+        (r'Destination $\times$ era FE', ['', 'Yes']),
+        ('Pre-founding Berlin, Bonn cells', ['Included', 'Dropped']),
+    ]).write(path)
 
 
 def main() -> None:
@@ -50,7 +79,7 @@ def main() -> None:
     #   level growth cannot leak into the era gradients (a level shift times
     #   mean log_dist ~6 mimics a change in reach).
     # - same_city absorbs the arbitrary 0.5 km same-town floor from build_od.
-    dyn = od[~(od['dest'].isin(NEW) & (od['era'] < 3))]
+    dyn = od[~(od['dest'].isin(NEW) & (od['era'] < DYNAMIC_ERAS[0]))]
     fml2 = ('flow ~ log_dist + same_city + is_berlin:log_dist:C(era) '
             '+ is_bonn:log_dist:C(era) | origin_id + dest^era')
     fit2 = pf.fepois(fml2, data=dyn, vcov={'CRV1': 'origin_id'}, solver='np.linalg.lstsq')
@@ -61,12 +90,14 @@ def main() -> None:
     # than eyeballing CIs: the era coefficients are correlated ~0.99, so level
     # SEs are wide while era differences are precisely estimated.
     names = list(fit2._coefnames)
+    equal_era_p = {}
     for school in NEW:
-        k = [names.index(f'is_{school}:log_dist:C(era)[{e}]') for e in (3, 4, 5)]
+        k = [names.index(f'is_{school}:log_dist:C(era)[{e}]') for e in DYNAMIC_ERAS]
         R = np.zeros((2, len(names)))
         R[0, k[0]], R[0, k[1]] = -1, 1
         R[1, k[0]], R[1, k[2]] = -1, 1
         w = fit2.wald_test(R=R, q=np.zeros(2))
+        equal_era_p[school] = float(w['pvalue'])
         print(f'joint Wald, {school} eras 3 = 4 = 5: '
               f'stat={float(w["statistic"]):.3f}, p={float(w["pvalue"]):.4f}')
 
@@ -116,6 +147,9 @@ def main() -> None:
     ax.set_ylabel('Flow-weighted mean distance (km)')
     ax.legend(title='')
     save(fig, paths.FIGURES / 'design_b_composition.png')
+
+    # Written after the figure, so the table is the newer of the two outputs.
+    write_tex(fit, fit2, equal_era_p, paths.TABLES / 'design_b_composition.tex')
 
 
 if __name__ == '__main__':

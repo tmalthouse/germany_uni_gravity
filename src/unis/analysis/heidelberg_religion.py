@@ -7,11 +7,12 @@ origin composition differ by student confession?
 1. Descriptive: distance distribution and Baden-origin share by religion.
 2. PPML on (origin polity x religion) counts, Catholic and Protestant only:
        flow ~ log_dist + baden + catholic x baden | religion
-   HC-robust SEs, with SEs clustered by origin polity printed as a check.
+   HC-robust SEs, with SEs clustered by origin polity as a check.
 
 Jewish students are reported descriptively but excluded from the regression.
 
-students_final.parquet -> output/figures/heidelberg_religion.png
+students_final.parquet -> output/figures/heidelberg_religion.png,
+                          output/tables/heidelberg_religion.tex
 """
 
 import matplotlib.pyplot as plt
@@ -22,7 +23,22 @@ import seaborn as sns
 from unis import paths
 from unis.geo import haversine_km
 from unis.gravity.heidelberg import RELIGION_COLORS, religion_sample, seat
+from unis.latex import integer, regression_table
 from unis.plotting import save, set_style
+
+
+def write_tex(robust, clustered, path) -> None:
+    """The PPML with robust and polity-clustered SEs side by side."""
+    rows = [
+        ('Log distance', ['log_dist', 'log_dist']),
+        ('Baden origin', ['baden', 'baden']),
+        (r'Catholic $\times$ Baden origin', ['inter', 'inter']),
+    ]
+    regression_table(['Robust SEs', 'Clustered by polity'],
+                     [robust.tidy(), clustered.tidy()], rows, footer=[
+        ('Observations', [integer(robust._N), integer(clustered._N)]),
+        ('Religion FE', ['Yes', 'Yes']),
+    ]).write(path)
 
 
 def main() -> None:
@@ -83,6 +99,8 @@ def main() -> None:
     fit_c = pf.fepois(fml, data=cells.to_pandas(), vcov={'CRV1': 'standard_location_name'})
     print('\nsame model, SEs clustered by origin polity:')
     print(fit_c.tidy().round(4))
+
+    write_tex(fit, fit_c, paths.TABLES / 'heidelberg_religion.tex')
 
 
 if __name__ == '__main__':

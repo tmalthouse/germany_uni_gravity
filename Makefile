@@ -65,7 +65,12 @@ GOT7 := goettingen7_event_study goettingen7_heterogeneity goettingen7_reallocati
         goettingen7_matched
 TABLE_FILES := $(TABLES)/gravity_results.csv $(TABLES)/event_study_1819.csv \
                $(GOT7:%=$(TABLES)/%.csv) $(TABLES)/goettingen7_placebo.csv
-TEX_FILES := $(TABLE_FILES:.csv=.tex) $(TABLES)/goettingen7_reallocation_ppml.tex
+# .tex tables named after their CSV; the gravity script instead writes two
+# differently named tables from gravity_results.csv's specifications.
+CSV_TEX := $(filter-out $(TABLES)/gravity_results.tex,$(TABLE_FILES:.csv=.tex))
+TEX_FILES := $(CSV_TEX) $(TABLES)/gravity_structure.tex $(TABLES)/gravity_by_decade.tex \
+             $(TABLES)/goettingen7_reallocation_ppml.tex \
+             $(TABLES)/design_b_composition.tex $(TABLES)/heidelberg_religion.tex
 FIGURE_FILES := $(FIGURES)/era_coefficients.png $(FIGURES)/event_study_1819.png \
                 $(FIGURES)/design_b_composition.png \
                 $(GOT7:%=$(FIGURES)/%.png) $(FIGURES)/goettingen7_placebo.png \
@@ -138,7 +143,9 @@ EVENTSTUDY := $(SRC)/gravity/eventstudy.py $(LATEX) $(PLOTTING)
 HEIDELBERG := $(SRC)/gravity/heidelberg.py $(SRC)/geo.py $(PLOTTING)
 
 # Every table script writes its .csv, then its booktabs .tex.
-$(TABLE_FILES:.csv=.tex): $(TABLES)/%.tex: $(TABLES)/%.csv
+$(CSV_TEX): $(TABLES)/%.tex: $(TABLES)/%.csv
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
+$(TABLES)/gravity_structure.tex $(TABLES)/gravity_by_decade.tex: $(TABLES)/gravity_results.csv
 	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
 $(TABLES)/goettingen7_reallocation_ppml.tex: $(TABLES)/goettingen7_reallocation.csv
 	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
@@ -158,8 +165,14 @@ $(FIGURES)/event_study_1819.png: $(TABLES)/event_study_1819.csv \
 	$(PY) unis.analysis.plot_event_study_1819 2>&1 | tee $(LOGS)/plot_event_study_1819.log
 
 $(FIGURES)/design_b_composition.png: $(OD) $(OD_YEAR) $(SRC)/analysis/design_b_composition.py \
-                                     $(PLOTTING) | $(LOGS)
+                                     $(PLOTTING) $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.design_b_composition 2>&1 | tee $(LOGS)/design_b_composition.log
+
+# These two scripts write their figure, then their regression table.
+$(TABLES)/design_b_composition.tex: $(FIGURES)/design_b_composition.png
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
+$(TABLES)/heidelberg_religion.tex: $(FIGURES)/heidelberg_religion.png
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
 
 # Göttingen Seven: each script writes its table, then its figure.
 $(GOT7:%=$(TABLES)/%.csv): $(TABLES)/%.csv: $(OD_YEAR) $(SRC)/analysis/%.py $(EVENTSTUDY) | $(LOGS)
@@ -177,7 +190,7 @@ $(FIGURES)/heidelberg_religion_tests.png: $(FINAL) $(SRC)/analysis/heidelberg_te
 	$(PY) unis.analysis.heidelberg_tests 2>&1 | tee $(LOGS)/heidelberg_tests.log
 
 $(FIGURES)/heidelberg_religion.png: $(FINAL) $(SRC)/analysis/heidelberg_religion.py \
-                                    $(HEIDELBERG) | $(LOGS)
+                                    $(HEIDELBERG) $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.heidelberg_religion 2>&1 | tee $(LOGS)/heidelberg_religion.log
 
 $(FIGURES)/student_map.html: $(FINAL) $(SRC)/analysis/student_map.py | $(LOGS)

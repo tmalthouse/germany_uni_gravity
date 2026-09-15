@@ -24,7 +24,7 @@ from unis.gravity.constants import (
     UNIVERSITY_NAMES,
     distance_to_goettingen,
 )
-from unis.latex import Tabular, integer, multicolumn, num, se, stars
+from unis.latex import Tabular, integer, multicolumn, num, regression_table
 from unis.plotting import save, set_style
 
 OUT_CSV = paths.TABLES / 'goettingen7_reallocation.csv'
@@ -94,19 +94,14 @@ def write_shares_tex(far: pl.DataFrame, near: pl.DataFrame, n_far: int, n_near: 
 
 
 def write_ppml_tex(fit, path) -> None:
-    tidy = fit.tidy()
-    t = Tabular('lc')
-    t.row('', 'Flow').midrule()
-    for coef, label in (('got_post', r'Göttingen $\times$ post'),
-                        ('new_post', r'Berlin or Bonn $\times$ post')):
-        r = tidy.loc[coef]
-        t.row(label, num(r['Estimate']) + stars(r['Pr(>|t|)']))
-        t.row('', se(r['Std. Error']))
-    t.midrule()
-    t.row('Observations', integer(fit._N))
-    for fe in ('Origin FE', 'Destination FE', 'Period FE'):
-        t.row(fe, 'Yes')
-    t.write(path)
+    rows = [
+        (r'Göttingen $\times$ post', ['got_post']),
+        (r'Berlin or Bonn $\times$ post', ['new_post']),
+    ]
+    regression_table(['Flow'], [fit.tidy()], rows, numbered=False, footer=[
+        ('Observations', [integer(fit._N)]),
+        *[(fe, ['Yes']) for fe in ('Origin FE', 'Destination FE', 'Period FE')],
+    ]).write(path)
 
 
 def main() -> None:

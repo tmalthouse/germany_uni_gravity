@@ -80,7 +80,8 @@ caption, label, notes and float live in the paper:
 
 | File | Contents |
 |---|---|
-| `gravity_results.tex` | the five gravity specifications, one column each, with observations and fixed-effect rows |
+| `gravity_structure.tex` | main text: the baseline gravity model and the confession split, with the test of same against different confession within states |
+| `gravity_by_decade.tex` | appendix: distance and border effects interacted with decade (the estimates behind `era_coefficients.png`), with joint tests of the interactions |
 | `event_study_1819.tex` | border effect by enrollment year in two side-by-side blocks; the reference year's row is the `same_state` coefficient |
 | `goettingen7_event_study.tex` | Göttingen × year path with pre-trend and post-period Wald p-values |
 | `goettingen7_heterogeneity.tex` | near- and far-origin paths side by side |
@@ -88,13 +89,17 @@ caption, label, notes and float live in the paper:
 | `goettingen7_reallocation.tex` | destination shares (%) before and after, and the change (percentage points), far vs near origins |
 | `goettingen7_reallocation_ppml.tex` | the PPML reallocation check |
 | `goettingen7_placebo.tex` | per university: 1838 coefficient, deepest dip and its year, 1838–47 mean |
+| `design_b_composition.tex` | Design B distance gradients of Berlin and Bonn relative to the old universities, static and by era, with equal-era Wald p-values |
+| `heidelberg_religion.tex` | the Heidelberg religion PPML with robust and polity-clustered SEs |
 
 Conventions, for the table notes: estimates to three decimals, standard
 errors in parentheses beneath (regression tables) or in an SE column (path
 tables), SEs clustered by origin, and 1837 shown as the reference year in the
-Göttingen paths. Stars appear only in the two regression tables:
-\* p < 0.10, \*\* p < 0.05, \*\*\* p < 0.01. Design B and the Heidelberg
-religion PPML still only print their estimates to the logs.
+Göttingen paths. Stars appear only in the regression tables (gravity,
+reallocation PPML, Design B, Heidelberg religion):
+\* p < 0.10, \*\* p < 0.05, \*\*\* p < 0.01. The Design B static column omits
+the Berlin and Bonn era dummies, which are fit to pre-founding zeros and
+numerically degenerate (findings §4–5); a footer row marks their inclusion.
 
 ## Sources
 

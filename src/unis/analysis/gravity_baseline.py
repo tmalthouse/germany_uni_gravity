@@ -9,7 +9,9 @@ Estimated with pyfixest's fepois; SEs clustered by origin (hometown place).
 The OD grid is zero-padded: zeros identify the extensive margin, which is what
 PPML needs for consistent estimation with FE (Santos Silva & Tenreyro 2006).
 
-od.parquet -> output/tables/gravity_results.csv, output/tables/gravity_results.tex
+od.parquet -> output/tables/gravity_results.csv (every specification),
+              output/tables/gravity_structure.tex (baseline and confession split),
+              output/tables/gravity_by_decade.tex (era interactions, backs Figure 1)
 """
 
 import re
@@ -20,7 +22,7 @@ import pyfixest as pf
 
 from unis import paths
 from unis.gravity.constants import ERA_LABELS
-from unis.latex import Tabular, integer, num, se, stars
+from unis.latex import integer, pvalue, regression_table
 
 OUT = paths.TABLES / 'gravity_results.csv'
 
@@ -41,75 +43,86 @@ SPECS = {
                         '+ ss_sc + ss_dc + ds_sc | origin_id + dest',
 }
 
-# --- LaTeX table ---------------------------------------------------------------
-SPEC_LABELS = {
-    'baseline': 'Baseline',
-    'dist_x_era': r'Distance $\times$ era',
-    'state_x_era': r'Border $\times$ era',
-    'both_x_era': r'Both $\times$ era',
-    'confession_split': 'Confession',
-}
-# Also the row order.
+# --- LaTeX tables --------------------------------------------------------------
 VARIABLE_LABELS = {
     'log_dist': 'Log distance',
     'same_state': 'Same state',
     'same_polity': 'Same polity',
-    'same_city': 'Same city',
     'ss_sc': 'Same state, same confession',
     'ss_dc': 'Same state, different confession',
     'ds_sc': 'Different state, same confession',
 }
-FIXED_EFFECTS = [
-    ('Origin FE', 'origin_id'),
-    ('Destination FE', 'dest'),
-    (r'Destination $\times$ era FE', 'era^dest'),
-]
+DECADE_SPECS = {
+    'dist_x_era': r'Distance $\times$ era',
+    'state_x_era': r'Border $\times$ era',
+    'both_x_era': 'Both',
+}
+LATER_ERAS = (2, 3, 4, 5)  # era 1 (1800s) is the reference
 
 
-def split_coef(name: str) -> tuple[str, int | None]:
-    """'log_dist:C(era)[T.3]' -> ('log_dist', 3); 'same_state' -> ('same_state', None)."""
-    m = re.fullmatch(r'(.+):C\(era\)\[T\.(\d+)\]', name)
-    return (m.group(1), int(m.group(2))) if m else (name, None)
+def era_term(var: str, era: int) -> str:
+    return f'{var}:C(era)[T.{era}]'
 
 
-def coef_label(name: str) -> str:
-    var, era = split_coef(name)
-    label = VARIABLE_LABELS[var]
-    return label if era is None else rf'{label} $\times$ {ERA_LABELS[era]}'
+def era_terms(fit, var: str) -> list[str]:
+    return [c for c in fit._coefnames if re.fullmatch(rf'{var}:C\(era\)\[T\.\d+\]', c)]
 
 
-def write_tex(results: dict, path) -> None:
-    """One column per specification: estimates with stars, SEs beneath."""
-    names = list(results)
-    tidy = {n: fit.tidy() for n, fit in results.items()}
-    order = list(VARIABLE_LABELS)
-    coefs = sorted({c for t in tidy.values() for c in t.index},
-                   key=lambda c: (order.index(split_coef(c)[0]), split_coef(c)[1] or 0))
-
-    t = Tabular('l' + 'c' * len(names))
-    t.row('', *[f'({i})' for i in range(1, len(names) + 1)])
-    t.row('', *[SPEC_LABELS[n] for n in names]).midrule()
-    for c in coefs:
-        estimates, errors = [], []
-        for n in names:
-            if c in tidy[n].index:
-                r = tidy[n].loc[c]
-                estimates.append(num(r['Estimate']) + stars(r['Pr(>|t|)']))
-                errors.append(se(r['Std. Error']))
-            else:
-                estimates.append('')
-                errors.append('')
-        t.row(coef_label(c), *estimates)
-        t.row('', *errors)
-    t.midrule()
-    t.row('Observations', *[integer(results[n]._N) for n in names])
-    for label, fe in FIXED_EFFECTS:
-        t.row(label, *['Yes' if fe in fixed_effects(SPECS[n]) else '' for n in names])
-    t.write(path)
+def wald_p(fit, R: np.ndarray) -> float:
+    return float(fit.wald_test(R=R, q=np.zeros(R.shape[0]))['pvalue'])
 
 
-def fixed_effects(formula: str) -> list[str]:
-    return [f.strip() for f in formula.split('|')[1].split('+')]
+def joint_zero_p(fit, coefs: list[str]) -> float:
+    """p-value for all `coefs` jointly zero."""
+    names = list(fit._coefnames)
+    return wald_p(fit, np.eye(len(names))[[names.index(c) for c in coefs]])
+
+
+def equal_p(fit, a: str, b: str) -> float:
+    """p-value for coefficient a equal to coefficient b."""
+    names = list(fit._coefnames)
+    R = np.zeros((1, len(names)))
+    R[0, names.index(a)], R[0, names.index(b)] = 1, -1
+    return wald_p(fit, R)
+
+
+def write_structure_tex(results: dict, path) -> None:
+    """Main-text table: the baseline and the confession split of the border effect."""
+    fits = [results['baseline'], results['confession_split']]
+    rows = [(VARIABLE_LABELS[v], [v, v])
+            for v in ('log_dist', 'same_state', 'same_polity', 'ss_sc', 'ss_dc', 'ds_sc')]
+    regression_table(['Baseline', 'Confession'], [f.tidy() for f in fits], rows, footer=[
+        ('Same state: same = different confession, $p$',
+         ['', pvalue(equal_p(results['confession_split'], 'ss_sc', 'ss_dc'))]),
+        ('Observations', [integer(f._N) for f in fits]),
+        ('Same-city control', ['Yes', 'Yes']),
+        ('Origin FE', ['Yes', 'Yes']),
+        ('Destination FE', ['Yes', 'Yes']),
+    ]).write(path)
+
+
+def write_decade_tex(results: dict, path) -> None:
+    """Appendix table: distance and border effects interacted with decade."""
+    fits = [results[s] for s in DECADE_SPECS]
+    rows = []
+    for var in ('log_dist', 'same_state'):
+        rows.append((VARIABLE_LABELS[var], [var] * len(fits)))
+        rows += [(rf'{VARIABLE_LABELS[var]} $\times$ {ERA_LABELS[e]}', [era_term(var, e)] * len(fits))
+                 for e in LATER_ERAS]
+    rows.append((VARIABLE_LABELS['same_polity'], ['same_polity'] * len(fits)))
+
+    def era_p(fit, var):
+        terms = era_terms(fit, var)
+        return pvalue(joint_zero_p(fit, terms)) if terms else ''
+
+    regression_table(list(DECADE_SPECS.values()), [f.tidy() for f in fits], rows, footer=[
+        (r'Distance $\times$ era terms $= 0$, $p$', [era_p(f, 'log_dist') for f in fits]),
+        (r'Border $\times$ era terms $= 0$, $p$', [era_p(f, 'same_state') for f in fits]),
+        ('Observations', [integer(f._N) for f in fits]),
+        ('Same-city control', ['Yes'] * len(fits)),
+        ('Origin FE', ['Yes'] * len(fits)),
+        (r'Destination $\times$ era FE', ['Yes'] * len(fits)),
+    ]).write(path)
 
 
 def main() -> None:
@@ -134,19 +147,23 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     out.write_csv(OUT)
     print(f'wrote {OUT}: {out.shape}')
-    write_tex(results, OUT.with_suffix('.tex'))
 
-    # Joint test: are all era interactions zero? (Wald, per specification)
+    # Joint tests of the era interactions, per specification
     for name, fit in results.items():
         inter = [c for c in fit._coefnames if ':C(era)' in c]
         if inter:
-            R = np.eye(len(fit._coefnames))[[fit._coefnames.index(c) for c in inter]]
-            w = fit.wald_test(R=R, q=np.zeros(len(inter)))
-            print(f'joint Wald test {name} (era interactions = 0): {w}')
+            print(f'joint Wald test {name} (era interactions = 0): '
+                  f'p={joint_zero_p(fit, inter):.4g}')
+    # Within states, does shared confession add to the border effect?
+    print('Wald test ss_sc = ss_dc (confession_split): '
+          f'p={equal_p(results["confession_split"], "ss_sc", "ss_dc"):.4f}')
 
     print('\n--- diagnostics ---')
     for name, fit in results.items():
         print(f'{name}: deviance {fit.deviance:.1f}, n {fit._N}')
+
+    write_structure_tex(results, paths.TABLES / 'gravity_structure.tex')
+    write_decade_tex(results, paths.TABLES / 'gravity_by_decade.tex')
 
 
 if __name__ == '__main__':
