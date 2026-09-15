@@ -18,6 +18,7 @@ import plotly.express as px
 import polars as pl
 
 from unis import paths
+from unis.gravity.constants import UNIVERSITY_NAMES
 
 BASE_JITTER = 0.002  # degrees per unit of log(city size)
 SEED = 42
@@ -68,7 +69,10 @@ def main() -> None:
     jittered = df.with_columns([
         pl.Series('lat', lats + scaled_noise_lat),
         pl.Series('lon', lons + scaled_noise_lon),
+        pl.col.school.replace_strict(UNIVERSITY_NAMES).alias('University'),
     ])
+    # Legend in the order of the school codes, so each university keeps its colour.
+    legend_order = [UNIVERSITY_NAMES[s] for s in df['school'].unique().sort().to_list()]
 
     center, zoom = fit_view(**BOUNDS, width_px=WIDTH - 2 * MARGIN - LEGEND_WIDTH,
                             height_px=HEIGHT - 2 * MARGIN)
@@ -76,12 +80,12 @@ def main() -> None:
         jittered,
         lat='lat',
         lon='lon',
-        color='school',
+        color='University',
         hover_data=['hometown', 'region'],
         center=center,
         zoom=zoom,
         color_discrete_sequence=px.colors.qualitative.Alphabet,
-        category_orders={'school': df['school'].unique().sort().to_list()},
+        category_orders={'University': legend_order},
     )
     fig.update_traces(marker=dict(size=2.5, opacity=0.01), selector=dict(type='scattermap'))
     fig.update_layout(
