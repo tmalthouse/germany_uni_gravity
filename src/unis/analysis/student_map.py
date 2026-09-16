@@ -25,9 +25,15 @@ SEED = 42
 
 # Germany with East Prussia: Aachen to Memel, the Alps to the Danish border.
 BOUNDS = dict(west=5.8, east=22.9, south=47.2, north=55.9)
-WIDTH, HEIGHT = 1600, 1200  # figure size in pixels
+# Figure size in pixels. The height is what BOUNDS need at the width left over
+# beside the legend; more would only add empty sea and Alps.
+WIDTH, HEIGHT = 2000, 1420
 MARGIN = 10
-LEGEND_WIDTH = 170  # approximate space the legend takes beside the map
+# Printed across a 6.5 in text block, a figure pixel is 468/WIDTH points, so
+# these labels set about 9.4 pt: the size of the surrounding body text.
+LEGEND_FONT_SIZE = 40
+LEGEND_WIDTH = 300  # space the legend takes beside the map, measured from a render
+PNG_SCALE = 2.5  # 5000 x 3750 px, about 770 dpi at that printed width
 TILE_SIZE = 512  # MapLibre renders the world 512 px wide at zoom 0
 
 # The map's schools (Munich's Landshut seat shares the `muenchen` school code).
@@ -98,7 +104,8 @@ def main() -> None:
     fig.update_layout(
         width=WIDTH, height=HEIGHT,
         margin=dict(l=MARGIN, r=MARGIN, t=MARGIN, b=MARGIN),
-        legend=dict(itemsizing='constant'),
+        legend=dict(itemsizing='constant', font=dict(size=LEGEND_FONT_SIZE),
+                    title=dict(font=dict(size=LEGEND_FONT_SIZE))),
         map_style='carto-positron',
     )
     for trace in fig.data:
@@ -109,7 +116,7 @@ def main() -> None:
     fig.write_html(html, include_plotlyjs='cdn')
     print(f'wrote {html}')
     png = paths.FIGURES / 'student_map.png'
-    fig.write_image(png, scale=2)
+    fig.write_image(png, scale=PNG_SCALE)
     print(f'wrote {png}')
 
 
