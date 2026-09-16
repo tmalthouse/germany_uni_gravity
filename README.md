@@ -91,6 +91,9 @@ caption, label, notes and float live in the paper:
 | `goettingen7_placebo.tex` | per university: 1838 coefficient, deepest dip and its year, 1838–47 mean |
 | `design_b_composition.tex` | Design B distance gradients of Berlin and Bonn relative to the old universities, static and by era, with equal-era Wald p-values |
 | `design_b_berlin_checks.tex` | Berlin's relative distance gradient without East Prussia, the eastern provinces or unmapped origins, from settlement-level geocodes only, and with border controls and origin-region and small-origin interactions |
+| `design_b_berlin_geocodes.tex` | geocode precision by university: shares of spells placed at a territory, district or country point, via the region field, from 300+ km, and both |
+| `design_b_berlin_provinces.tex` | Berlin's enrollments by origin province, with origins and mean distance |
+| `design_b_berlin_east_prussia.tex` | Berlin's East and West Prussian origins, with how each was geocoded |
 | `heidelberg_religion.tex` | the Heidelberg religion PPML with robust and polity-clustered SEs |
 
 Conventions, for the table notes: estimates to three decimals, standard

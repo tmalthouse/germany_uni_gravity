@@ -65,6 +65,8 @@ GOT7 := goettingen7_event_study goettingen7_heterogeneity goettingen7_reallocati
         goettingen7_matched
 TABLE_FILES := $(TABLES)/gravity_results.csv $(TABLES)/event_study_1819.csv \
                $(TABLES)/design_b_berlin_checks.csv \
+               $(TABLES)/design_b_berlin_geocodes.csv $(TABLES)/design_b_berlin_provinces.csv \
+               $(TABLES)/design_b_berlin_east_prussia.csv \
                $(GOT7:%=$(TABLES)/%.csv) $(TABLES)/goettingen7_placebo.csv
 # .tex tables named after their CSV; the gravity script instead writes two
 # differently named tables from gravity_results.csv's specifications.
@@ -172,6 +174,16 @@ $(FIGURES)/design_b_composition.png: $(OD) $(OD_YEAR) $(SRC)/analysis/design_b_c
 $(TABLES)/design_b_berlin_checks.csv: $(OD) $(FINAL) $(SRC)/analysis/design_b_berlin_checks.py \
                                       $(SRC)/gravity/build_od.py $(LATEX) | $(LOGS)
 	$(PY) unis.analysis.design_b_berlin_checks 2>&1 | tee $(LOGS)/design_b_berlin_checks.log
+
+# design_b_berlin_origins writes the geocodes table, then provinces, then East Prussia.
+$(TABLES)/design_b_berlin_geocodes.csv: $(OD) $(FINAL) $(SRC)/analysis/design_b_berlin_origins.py \
+                                        $(SRC)/analysis/design_b_berlin_checks.py \
+                                        $(SRC)/gravity/build_od.py $(SRC)/geo.py $(LATEX) | $(LOGS)
+	$(PY) unis.analysis.design_b_berlin_origins 2>&1 | tee $(LOGS)/design_b_berlin_origins.log
+$(TABLES)/design_b_berlin_provinces.csv: $(TABLES)/design_b_berlin_geocodes.csv
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
+$(TABLES)/design_b_berlin_east_prussia.csv: $(TABLES)/design_b_berlin_provinces.csv
+	@test -f $@ || { rm -f $<; $(MAKE) --no-print-directory $<; }
 
 # These two scripts write their figure, then their regression table.
 $(TABLES)/design_b_composition.tex: $(FIGURES)/design_b_composition.png
