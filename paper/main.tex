@@ -11,9 +11,12 @@
 \usepackage{amssymb} % \mathbb
 \usepackage{caption}
 \usepackage{floatrow}
+\usepackage{setspace}
 \usepackage[backend=biber,style=authoryear,url=false]{biblatex}
 
 \addbibresource{cites.bib}
+
+\doublespacing
 
 % Captions no wider than the float they belong to (\ttabbox, \ffigbox below),
 % with a gap between caption and object.
@@ -44,7 +47,7 @@
   {\includegraphics[width=\textwidth]{student_map.png}}
 \end{figure}
 
-\section{Market structure}
+\section{Student flows}
 
 Following \textcite{HEAD2014131}, the main specification follows the general gravity form
 \begin{equation}
@@ -74,7 +77,7 @@ Origin and destination fixed effects absorb $\ln G + \ln S_o$ and $\ln M_d$, giv
 \label{eq:gravity_baseline}
 \end{equation}
 
-``SameState'' indicates whether the origin-destination pair lies within the same sovereign state. ``SamePolity'' indicates whether the origin-destination pair lie within the same province, district, or similar subnational division---this name was chosen because only Prussia had provinces \emph{per se}, but other states had analagous administrative divisions.
+``SameState'' indicates whether the origin-destination pair lies within the same sovereign state. ``SamePolity'' indicates whether the origin-destination pair lie within the same province, district, or similar subnational division---this name was chosen because only Prussia had provinces \emph{per se}, but other states had analagous administrative divisions. ``SameCity'' indicates that a student's hometown matches the city of their university.
 
 In analysis (2) the border effect is split by confessional pairing of origin and university, with the baseline being different-state, different-confession OD pairs, giving estimating equation
 \begin{equation}
@@ -96,19 +99,50 @@ Note that confession is derived from location, as micro-level confessional data 
 \begin{table}[htbp]
   \ttabbox
   {\caption{Baseline specifications, estimating the structure of the German student market in 1800--50 using a gravity model. Model (1) presents a standard gravity model with a $\log$(distance) term and dummies for same-state and same-polity (essentially same-province) origin-destination pairs. The recovered distance elasticity is similar to the value found in papers studying the modern student market; the very large ``same state'' coefficient indicates that political boundaries were very important in shaping the student market. \\
-   Specification (2) decomposes the ``same state'' effect, examining whether it is driven by the state border itself or religious homophily. A student's religion is inferred from the regionally dominant confession (see caveat in text), giving four categories: a student attending a university of the same confession in the same state, same confession in a different state, different confession in the same state, or different confession in a different state. The ``same confession, same state'' category, by far the most common, is omitted. The results of this analysis show that political boundaries are far more determinative of university choice than confession, and that we cannot reject the hypothesis that, within a state, confession has no effect on university choice.}
+   Specification (2) decomposes the ``same state'' effect, examining whether it is driven by the state border itself or religious homophily. A student's religion is inferred from the regionally dominant confession (see caveat in text), giving four categories: a student attending a university of the same confession in the same state, same confession in a different state, different confession in the same state, or different confession in a different state. The ``same confession, same state'' category, by far the most common, is omitted. The results of this analysis show that political boundaries are far more determinative of university choice than confession, and that we cannot reject the hypothesis that, within a state, confession has no effect on university choice. Standard errors for both specifications are clustered at the origin (hometown) level.}
    \label{tab:gravity_structure}}
   {\input{\tabledir/gravity_structure.tex}}
 \end{table}
 
-\section{Fragmentation over time}
+It is possible that the student market changed over the sample period. Improvements in transportation technology may cause the distance elasticity to decrease; political changes or a changing student body may also have some effect. This section tests whether the two main parameters estimated in the previous section vary by decade.
+
+All specifications detailed in this section build on specification (1) in table~\ref{eq:gravity_baseline}. Specifications are estimated by PPML, with standard errors clustered by origin, $e$ indexes the decade, $t$ the year of first enrolment, $o$ the student's hometown, and $d$ their destination university. The distance and state border terms are interacted with decade dummies, with 1800--09 being used as the baseline. Destination-decade fixed effects absorb each university's enrolment level. The estimating equation used to create figure \ref{fig:era_coefficients} is then
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
+  &= \alpha_o + \gamma_{de}
+   + (\beta_1 + \lambda_e) \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + (\beta_3 + \mu_e) \mathrm{SameState}_{od}
+   + \beta_4 \mathrm{SamePolity}_{od},
+   \qquad \lambda_1 = \mu_1 = 0,
+\end{split}
+\label{eq:gravity_by_decade}
+\end{equation}
 
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{These figures examine whether the core parameters of the gravity model, the distance elasticity and same-state effect, vary over time. Estimated by equation \ref{eq:gravity_by_decade}, these plots show the interaction term of the parameter with decade dummies. As the first plot shows, there was a slight increase in the state border effect (not statistically different from flat) in the 1920s, slightly decreasing after that; the second plot shows that the distance elasticity decreases very slightly with time (but also not statistically differing from a constant elasticity.)}
    \label{fig:era_coefficients}}
   {\includegraphics[width=\textwidth]{era_coefficients.png}}
 \end{figure}
+
+The elasticity of distance is nearly flat over the sample period, with a slight decrease over time. The same-state effect increases somewhat after 1820, although not enough to reject the hypothesis of a constant effect.
+
+A possible cause of this increase are the Carlsbad Decrees of 1819. These policies were intended to decrease radical activity (including support for German unification) at universities, led to the dismissal of liberal faculty members, and banned many student organizations. This may have some effect on the border effect, since it would be politically ``safer.'' I test this by estimating
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_{dt}
+   + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + (\beta_3 + \theta_t) \mathrm{SameState}_{od},
+   \qquad \theta_{t_0} = 0,
+\end{split}
+\label{eq:event_study_1819}
+\end{equation}
+where $t_0$ is the first year of the sample. Figure~\ref{fig:event_study_1819}
+plots the path $\beta_3 + \theta_t$, the by-year state border effect.
 
 \begin{figure}[htbp]
   \ffigbox
@@ -117,7 +151,40 @@ Note that confession is derived from location, as micro-level confessional data 
   {\includegraphics[width=\textwidth]{event_study_1819.png}}
 \end{figure}
 
+The Carlsbad Decrees were not the cause of the increase in the state border effect. The increase began roughly five years earlier, with no further changes following the policy change.
+
 \section{The new universities}
+
+Berlin (1810) and Bonn (1818) enter with their own distance gradients, measured
+relative to the old universities' $\beta_1$:
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \delta_e
+   + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + \sum_{k \in \{\text{Berlin}, \text{Bonn}\}}
+     \Big( \kappa_k \mathbf{1}[d = k] \ln \mathrm{dist}_{od}
+     + \sum_{e} \pi_{ke} \mathbf{1}[d = k] \Big),
+\end{split}
+\label{eq:design_b_static}
+\end{equation}
+so $\kappa_k > 0$ means university $k$'s enrollments fall off less steeply with
+distance than the old universities'. Letting those gradients vary by decade, on
+the sample that drops each new university's pre-founding cells, gives
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
+  &= \alpha_o + \gamma_{de}
+   + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + \sum_{k \in \{\text{Berlin}, \text{Bonn}\}} \; \sum_{e \geq 3}
+     \kappa_{ke} \mathbf{1}[d = k] \ln \mathrm{dist}_{od},
+\end{split}
+\label{eq:design_b_dynamic}
+\end{equation}
+where destination-by-decade fixed effects hold each university's level in each
+decade fixed, so growth in enrollments cannot masquerade as a change in reach.
 
 \begin{figure}[htbp]
   \ffigbox
@@ -125,6 +192,8 @@ Note that confession is derived from location, as micro-level confessional data 
    \label{fig:design_b_composition}}
   {\includegraphics[width=\textwidth]{design_b_composition.png}}
 \end{figure}
+
+
 
 \begin{table}[htbp]
   \ttabbox
@@ -136,12 +205,61 @@ Note that confession is derived from location, as micro-level confessional data 
 
 \begin{table}[htbp]
   \ttabbox
-  {\caption{Placeholder.}
+  {\caption{Placeholder. Re-estimates \eqref{eq:design_b_static} on restricted
+   samples and with added controls; the object throughout is
+   $\kappa_{\text{Berlin}}$.}
    \label{tab:design_b_berlin_checks}}
   {\input{\tabledir/design_b_berlin_checks.tex}}
 \end{table}
 
 \section{The Göttingen Seven}
+
+The December 1837 dismissals are a single-destination event study on the annual
+grid, with 1837 omitted:
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \delta_t
+   + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + \sum_{y \neq 1837} \tau_y \,
+     \mathbf{1}[d = \text{Göttingen}] \, \mathbf{1}[t = y].
+\end{split}
+\label{eq:got7_event}
+\end{equation}
+Year fixed effects absorb economy-wide and cohort shocks, so $\tau_y$ is
+Göttingen's enrollment relative to the other universities in year $y$. Splitting
+origins at 200\,km from Göttingen lets the path differ by how far students had to
+travel:
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \delta_t
+   + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od} \\
+  &\quad + \sum_{g \in \{\text{near}, \text{far}\}}
+     \Big( \psi_g G_{odg}
+     + \sum_{y \neq 1837} \tau_{gy} \, G_{odg} \, \mathbf{1}[t = y] \Big),
+\end{split}
+\label{eq:got7_heterogeneity}
+\end{equation}
+where $G_{odg} = \mathbf{1}[d = \text{Göttingen}] \, \mathbf{1}[o \in g]$. Both
+paths are estimated in one regression, so they share the likelihood and the fixed
+effects. The donor-pool and placebo exercises re-estimate \eqref{eq:got7_event}
+on restricted sets of destinations, and with each other university treated in
+turn.
+
+Where the lost students went is a pre/post comparison on the origins that sent
+students to Göttingen before the dismissals:
+\begin{equation}
+\ln \mathbb{E}\!\left[F_{odp} \mid \cdot\right]
+  = \alpha_o + \gamma_d + \delta_p
+   + \rho_{\text{G}} \, \mathbf{1}[d = \text{Göttingen}] \, \mathrm{Post}_p
+   + \rho_{\text{N}} \, \mathbf{1}[d \in \{\text{Berlin}, \text{Bonn}\}] \, \mathrm{Post}_p,
+\label{eq:got7_reallocation}
+\end{equation}
+with $p$ running over 1834--37 and 1838--41 and the other old universities as the
+omitted destination group.
 
 \begin{figure}[htbp]
   \ffigbox
@@ -200,6 +318,25 @@ Note that confession is derived from location, as micro-level confessional data 
 \end{table}
 
 \section{Student religion at Heidelberg}
+
+Heidelberg is the only register that records a student's religion, so a four-way
+state-by-confession split is not estimable. Instead the unit is an origin polity
+$o$ paired with a confession $r$, and the question is whether Catholic and
+Protestant enrollees were drawn from different places:
+\begin{equation}
+\ln \mathbb{E}\!\left[F_{or} \mid \cdot\right]
+  = \nu_r
+   + \beta_1 \ln \mathrm{dist}_{o}
+   + \beta_2 \mathrm{Baden}_{o}
+   + \beta_3 \, \mathbf{1}[r = \text{Catholic}] \, \mathrm{Baden}_{o},
+\label{eq:heidelberg_religion}
+\end{equation}
+where $\mathrm{dist}_{o}$ is the distance from $o$ to Heidelberg and the
+confession fixed effect $\nu_r$ absorbs the Catholic and Protestant totals, so
+$\beta_3$ is the difference in how far Baden's own students were over-represented
+by confession. Jewish students are reported descriptively but excluded here.
+Standard errors are heteroskedasticity-robust, with origin-polity clustering as a
+check.
 
 \begin{figure}[htbp]
   \ffigbox

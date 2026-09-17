@@ -45,6 +45,7 @@ def main() -> None:
         ('Pre-trend test (1834--36), $p$', [pvalue(float(w_pre['pvalue']))]),
         ('Post-period test (1838--47), $p$', [pvalue(float(w_post['pvalue']))]),
         ('Observations', [integer(fit._N)]),
+        ('Same-city control', ['Yes']),
     ]).write(OUT_CSV.with_suffix('.tex'))
 
     ev['lo'] = ev['est'] - 1.96 * ev['se']

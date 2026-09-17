@@ -46,6 +46,7 @@ def write_tex(rows: list[tuple[int, float, float]], n_obs: int, wald_p: float, p
     t.row(multicolumn(3, 'l', 'Observations'), multicolumn(3, 'r', integer(n_obs)))
     t.row(multicolumn(3, 'l', r'Joint test, year interactions $= 0$: $p$'),
           multicolumn(3, 'r', pvalue(wald_p)))
+    t.row(multicolumn(3, 'l', 'Same-city control'), multicolumn(3, 'r', 'Yes'))
     t.write(path)
 
 

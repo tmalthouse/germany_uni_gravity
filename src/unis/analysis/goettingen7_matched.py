@@ -67,6 +67,7 @@ def main() -> None:
         ('Pre-trend test (1834--36), $p$', footer['pre']),
         ('Post-period test (1838--47), $p$', footer['post']),
         ('Observations', footer['n']),
+        ('Same-city control', ['Yes']),
     ]).write(OUT_CSV.with_suffix('.tex'))
 
     set_style()

@@ -40,11 +40,14 @@ def write_tex(static, dynamic, equal_era_p: dict[str, float], path) -> None:
         rows.append((rf'{name} $\times$ log distance', [f'is_{school}:log_dist', None]))
         rows += [(rf'{name} $\times$ log distance $\times$ {ERA_LABELS[e]}',
                   [None, f'is_{school}:log_dist:C(era)[{e}]']) for e in DYNAMIC_ERAS]
-    rows.append(('Same city', ['same_city', 'same_city']))
+    # same_city is flagged, not reported: on those cells log_dist carries the
+    # arbitrary log(0.5 km) floor from build_od, so the dummy's coefficient
+    # shifts one-for-one with that choice and is not a hometown premium.
     regression_table(['Static', 'By era'], [static.tidy(), dynamic.tidy()], rows, footer=[
         (r'Berlin gradients equal across eras, $p$', ['', pvalue(equal_era_p['berlin'])]),
         (r'Bonn gradients equal across eras, $p$', ['', pvalue(equal_era_p['bonn'])]),
         ('Observations', [integer(static._N), integer(dynamic._N)]),
+        ('Same-city control', ['Yes', 'Yes']),
         (r'Berlin, Bonn $\times$ era', ['Yes', '']),
         ('Origin FE', ['Yes', 'Yes']),
         ('Destination FE', ['Yes', '']),

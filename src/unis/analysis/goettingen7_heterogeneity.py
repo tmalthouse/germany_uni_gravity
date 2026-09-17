@@ -81,7 +81,8 @@ def main() -> None:
     path_table(
         {label: p.rename(columns={'Estimate': 'est', 'Std. Error': 'se'})
          for label, p in paths_for_table.items()},
-        footer=[('Observations', [integer(fit._N)])],
+        footer=[('Observations', [integer(fit._N)]),
+                ('Same-city control', ['Yes'])],
     ).write(OUT_CSV.with_suffix('.tex'))
 
     ev['lo'] = ev['Estimate'] - 1.96 * ev['Std. Error']
