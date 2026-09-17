@@ -17,9 +17,13 @@ __pycache__/
 
 # LaTeX build files
 /paper/*.aux
+/paper/*.bbl
+/paper/*.bcf
+/paper/*.blg
 /paper/*.fdb_latexmk
 /paper/*.fls
 /paper/*.log
 /paper/*.out
 /paper/*.pdf
+/paper/*.run.xml
 /paper/*.synctex.gz
