@@ -11,6 +11,7 @@
 \usepackage{amssymb} % \mathbb
 \usepackage{caption}
 \usepackage{floatrow}
+\usepackage{threeparttable} % table notes, set to the width of the tabular
 \usepackage{setspace}
 \usepackage[backend=biber,style=authoryear,url=false]{biblatex}
 
@@ -98,7 +99,7 @@ Note that confession is derived from location, as micro-level confessional data 
 
 \begin{table}[htbp]
   \ttabbox
-  {\caption{Baseline specifications, estimating the structure of the German student market in 1800--50 using a gravity model. Model (1) presents a standard gravity model with a $\log$(distance) term and dummies for same-state and same-polity (essentially same-province) origin-destination pairs. The recovered distance elasticity is similar to the value found in papers studying the modern student market; the very large ``same state'' coefficient indicates that political boundaries were very important in shaping the student market. \\
+  {\caption{Baseline specifications, estimating the structure of the German student market in 1800--48 using a gravity model. Model (1) presents a standard gravity model with a $\log$(distance) term and dummies for same-state and same-polity (essentially same-province) origin-destination pairs. The recovered distance elasticity is similar to the value found in papers studying the modern student market; the very large ``same state'' coefficient indicates that political boundaries were very important in shaping the student market. \\
    Specification (2) decomposes the ``same state'' effect, examining whether it is driven by the state border itself or religious homophily. A student's religion is inferred from the regionally dominant confession (see caveat in text), giving four categories: a student attending a university of the same confession in the same state, same confession in a different state, different confession in the same state, or different confession in a different state. The ``same confession, same state'' category, by far the most common, is omitted. The results of this analysis show that political boundaries are far more determinative of university choice than confession, and that we cannot reject the hypothesis that, within a state, confession has no effect on university choice. Standard errors for both specifications are clustered at the origin (hometown) level.}
    \label{tab:gravity_structure}}
   {\input{\tabledir/gravity_structure.tex}}
@@ -146,7 +147,7 @@ plots the path $\beta_3 + \theta_t$, the by-year state border effect.
 
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{An event study examining whether the reactionary Carlsbad Decrees of 1819 could be linked to the increased same-state effect, as estimated by equation \ref{eq:event_study_1819}. This theory can be confidently rejected: the increase in propensity to attend a same-state university takes place in the preceding five years, and appears to level off after the decrees are passed.}
    \label{fig:event_study_1819}}
   {\includegraphics[width=\textwidth]{event_study_1819.png}}
 \end{figure}
@@ -155,8 +156,7 @@ The Carlsbad Decrees were not the cause of the increase in the state border effe
 
 \section{The new universities}
 
-Berlin (1810) and Bonn (1818) enter with their own distance gradients, measured
-relative to the old universities' $\beta_1$:
+Two new universities are founded in the sample period. Berlin is established in 1810 and Bonn in 1818, both as intentionally ``modern'' universities with a more rigourous curriculum than existing universities. It may be that these universities draw students from further away and have a lower distance elasticity. I test this using specification
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
@@ -169,9 +169,9 @@ relative to the old universities' $\beta_1$:
 \end{split}
 \label{eq:design_b_static}
 \end{equation}
-so $\kappa_k > 0$ means university $k$'s enrollments fall off less steeply with
-distance than the old universities'. Letting those gradients vary by decade, on
-the sample that drops each new university's pre-founding cells, gives
+For each new university $k$, $\kappa_k > 0$ means that institution's distance elasticity is smaller in magnitude than the old universities'---that is, students travel from further away to attend.
+
+It may also be the case that these relative distance gradients vary over time, as these universities build reputations or incumbent institutions are better able to compete. In this specification, I consider only flows after the founding of the university for which I have data---that is, only the 1820--48 subsample. The estimating equation is
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
@@ -183,12 +183,11 @@ the sample that drops each new university's pre-founding cells, gives
 \end{split}
 \label{eq:design_b_dynamic}
 \end{equation}
-where destination-by-decade fixed effects hold each university's level in each
-decade fixed, so growth in enrollments cannot masquerade as a change in reach.
+Note that destination-by-decade fixed effects hold the level by decade fixed, so increasing enrolment will not change $\kappa_{ke}$ if the underlying elasticity does not change as well. As before, $\kappa_{ke} > 0$ indicates that university $k$ in decade $e$ has a lower distance elasticity and broader reach than the sample as a whole.
 
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{The mean distance traveled by students to attend Berlin, Bonn, and incumbent universities, by year. Note that Berlin is immediately unusual, with a mean distance traveled of almost twice the incumbent universities; Bonn also has a longer distance, but less dramatically. It also appears that the opening of these new universities lowered the average distance traveled to incumbent universities, suggesting the new institutions were poaching certain (presumably wealthy or ambitious) students.}
    \label{fig:design_b_composition}}
   {\includegraphics[width=\textwidth]{design_b_composition.png}}
 \end{figure}
@@ -197,22 +196,49 @@ decade fixed, so growth in enrollments cannot masquerade as a change in reach.
 
 \begin{table}[htbp]
   \ttabbox
-  {\caption{Placeholder.}
+  {\caption{These specifications test whether the new Prussian universities, explicitly founded as research universities, differed in their distance elasticity from the sample overall. A positive coefficient on the interaction term suggests a lower distance elasticity---that is, that these universities attracted students from farther away than other universities. Berlin has a very large and positive coefficient, which is similar across decades: it was an institution whose student body was far more dispersed than the others. Bonn also drew from farther away, but to a lesser degree, and this effect appears to be concentrated in the 1830s.}
    \label{tab:design_b_composition}}
   {\input{\tabledir/design_b_composition.tex}}
 \end{table}
 
+One concern is that Berlin, rather than offering a more attractive program, may simply be the most convenient university for students from very rural East Prussia---see figure \ref{fig:student_map}. Table~\ref{tab:design_b_berlin_checks} re-estimates equation~\ref{eq:design_b_static} on various subsamples of the Berlin student body and with additional controls, finding a consistently positive effect of similar magnitude.
+
 
 \begin{table}[htbp]
   \ttabbox
-  {\caption{Placeholder. Re-estimates \eqref{eq:design_b_static} on restricted
-   samples and with added controls; the object throughout is
+  {\caption{Re-estimates \eqref{eq:design_b_static} on restricted
+   samples and with additional controls. The estimand in all specifications is
    $\kappa_{\text{Berlin}}$.}
    \label{tab:design_b_berlin_checks}}
-  {\input{\tabledir/design_b_berlin_checks.tex}}
+  {\begin{threeparttable}
+   \input{\tabledir/design_b_berlin_checks.tex}
+   \begin{tablenotes}[flushleft]\footnotesize
+   \item \textit{Notes:} Each row reports the Berlin $\times$ log distance
+   coefficient of \eqref{eq:design_b_static}, estimated by PPML with standard
+   errors clustered by origin; a positive value means Berlin's enrollments fall
+   off less steeply with distance than the old universities' do.
+   $^{*}$, $^{**}$ and $^{***}$ denote significance at the 10, 5 and 1 percent
+   levels.
+   \item Panel A holds the specification fixed and varies the estimation sample.
+   ``Berlin flow'' is the share of Berlin's enrollments the sample retains, so it
+   reports how much of the pattern under test each restriction discards. The
+   eastern provinces are East and West Prussia, Posen and Silesia; unmapped
+   origins are those falling in no mapped polity, mostly foreign or border-gap
+   places. The two settlement-level rows rebuild the origin-destination grid from
+   spells geocoded to a settlement rather than filtering rows of the published
+   grid, so their origins, distances and fixed effects are all recomputed and
+   their sample sizes are not nested in the rows above.
+   \item Panel B keeps every origin and adds terms. Small origins are those
+   sending fewer than 10 students in total. The three by-region rows partition
+   the Berlin interaction, so each is a level for that group rather than a
+   contrast against the others, and the differences between them are not tested.
+   \end{tablenotes}
+   \end{threeparttable}}
 \end{table}
 
 \section{The Göttingen Seven}
+
+
 
 The December 1837 dismissals are a single-destination event study on the annual
 grid, with 1837 omitted:
