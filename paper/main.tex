@@ -7,6 +7,19 @@
 \usepackage{graphicx}
 \usepackage[section]{placeins} % keep floats within their section
 \usepackage[hidelinks]{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb} % \mathbb
+\usepackage{caption}
+\usepackage{floatrow}
+\usepackage[backend=biber,style=authoryear,url=false]{biblatex}
+
+\addbibresource{cites.bib}
+
+% Captions no wider than the float they belong to (\ttabbox, \ffigbox below),
+% with a gap between caption and object.
+\floatsetup[table]{style=plaintop, captionskip=10pt}
+\floatsetup[figure]{captionskip=10pt}
+
 
 % Build outputs from `make`, relative to this directory.
 \graphicspath{{../output/figures/}}
@@ -25,200 +38,254 @@
 \section{Data}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{student_map.png}
-  \caption{Placeholder.}
-  \label{fig:student_map}
+  \ffigbox
+  {\caption{A map showing the geographic distribution of student origins, with hue representing the chosen university. Town clusters are sized according to $\log(\text{flow})$. Note the stark borders in university catchment areas: it appears most universities disproportionately draw in-state students. Note also the stark difference in student geography between the Prussian east (where the student-producing classes were concentrated in cities) and the west (where towns had a stronger tradition of cottage production and educated elites).}
+   \label{fig:student_map}}
+  {\includegraphics[width=\textwidth]{student_map.png}}
 \end{figure}
 
 \section{Market structure}
 
+Following \textcite{HEAD2014131}, the main specification follows the general gravity form
+\begin{equation}
+F_{odt} = G \, S_o \, M_d \, \phi_{od} \, \eta_{odt},
+  \qquad \mathbb{E}\!\left[\eta_{odt} \mid \cdot\right] = 1,
+\label{eq:gravity_general}
+\end{equation}
+with bilateral term
+\begin{equation}
+\phi_{od} = \mathrm{dist}_{od}^{\,\beta_1}
+  \exp\!\Big(
+      \beta_2 \mathrm{SameCity}_{od}
+      + \beta_3 \mathrm{SameState}_{od}
+      + \beta_4 \mathrm{SamePolity}_{od}
+    \Big).
+\label{eq:phi}
+\end{equation}
+Origin and destination fixed effects absorb $\ln G + \ln S_o$ and $\ln M_d$, giving estimating equation
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \beta_1 \ln \mathrm{dist}_{od} \\
+  &\quad + \beta_2 \mathrm{SameCity}_{od}
+   + \beta_3 \mathrm{SameState}_{od}
+   + \beta_4 \mathrm{SamePolity}_{od}.
+\end{split}
+\label{eq:gravity_baseline}
+\end{equation}
+
+``SameState'' indicates whether the origin-destination pair lies within the same sovereign state. ``SamePolity'' indicates whether the origin-destination pair lie within the same province, district, or similar subnational division---this name was chosen because only Prussia had provinces \emph{per se}, but other states had analagous administrative divisions.
+
+In analysis (2) the border effect is split by confessional pairing of origin and university, with the baseline being different-state, different-confession OD pairs, giving estimating equation
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \beta_1 \ln \mathrm{dist}_{od}
+   + \beta_2 \mathrm{SameCity}_{od}
+   + \beta_4 \mathrm{SamePolity}_{od} \\
+  &\quad + \lambda_{\mathrm{SS,SC}} \mathrm{SS\text{-}SC}_{od}
+   + \lambda_{\mathrm{SS,DC}} \mathrm{SS\text{-}DC}_{od}
+   + \lambda_{\mathrm{DS,SC}} \mathrm{DS\text{-}SC}_{od}.
+\end{split}
+\label{eq:gravity_confession}
+\end{equation}
+Both specifications are estimated using Poisson pseudo-maximum likelihood (PPML), as is standard in this literature, since many origin-destination-year flows are zero.
+
+Note that confession is derived from location, as micro-level confessional data are only available for Heidelberg students. For example, the Prussian Rhineland is a majority-Catholic region in a majority-Protestant state, so students coming from that region attending Berlin would be classified as ``same state, different confession;'' a student from the region attending Freiburg would be classified as ``different state, same confession.'' This is not a perfect metric---many regions had both confessions well-represented, and we know nothing about the behaviour of Jewish students. The appendix presents a robustness exercise looking only at Heidelberg students whose individual religion is known (TODO).
+
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:gravity_structure}
-  \input{\tabledir/gravity_structure.tex}
+  \ttabbox
+  {\caption{Baseline specifications, estimating the structure of the German student market in 1800--50 using a gravity model. Model (1) presents a standard gravity model with a $\log$(distance) term and dummies for same-state and same-polity (essentially same-province) origin-destination pairs. The recovered distance elasticity is similar to the value found in papers studying the modern student market; the very large ``same state'' coefficient indicates that political boundaries were very important in shaping the student market. \\
+   Specification (2) decomposes the ``same state'' effect, examining whether it is driven by the state border itself or religious homophily. A student's religion is inferred from the regionally dominant confession (see caveat in text), giving four categories: a student attending a university of the same confession in the same state, same confession in a different state, different confession in the same state, or different confession in a different state. The ``same confession, same state'' category, by far the most common, is omitted. The results of this analysis show that political boundaries are far more determinative of university choice than confession, and that we cannot reject the hypothesis that, within a state, confession has no effect on university choice.}
+   \label{tab:gravity_structure}}
+  {\input{\tabledir/gravity_structure.tex}}
 \end{table}
 
 \section{Fragmentation over time}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{era_coefficients.png}
-  \caption{Placeholder.}
-  \label{fig:era_coefficients}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:era_coefficients}}
+  {\includegraphics[width=\textwidth]{era_coefficients.png}}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{event_study_1819.png}
-  \caption{Placeholder.}
-  \label{fig:event_study_1819}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:event_study_1819}}
+  {\includegraphics[width=\textwidth]{event_study_1819.png}}
 \end{figure}
 
 \section{The new universities}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{design_b_composition.png}
-  \caption{Placeholder.}
-  \label{fig:design_b_composition}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:design_b_composition}}
+  {\includegraphics[width=\textwidth]{design_b_composition.png}}
 \end{figure}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:design_b_composition}
-  \input{\tabledir/design_b_composition.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:design_b_composition}}
+  {\input{\tabledir/design_b_composition.tex}}
+\end{table}
+
+
+\begin{table}[htbp]
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:design_b_berlin_checks}}
+  {\input{\tabledir/design_b_berlin_checks.tex}}
 \end{table}
 
 \section{The Göttingen Seven}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{goettingen7_event_study.png}
-  \caption{Placeholder.}
-  \label{fig:goettingen7_event_study}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:goettingen7_event_study}}
+  {\includegraphics[width=\textwidth]{goettingen7_event_study.png}}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{goettingen7_heterogeneity.png}
-  \caption{Placeholder.}
-  \label{fig:goettingen7_heterogeneity}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:goettingen7_heterogeneity}}
+  {\includegraphics[width=\textwidth]{goettingen7_heterogeneity.png}}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{goettingen7_reallocation.png}
-  \caption{Placeholder.}
-  \label{fig:goettingen7_reallocation}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:goettingen7_reallocation}}
+  {\includegraphics[width=\textwidth]{goettingen7_reallocation.png}}
 \end{figure}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_reallocation}
-  \input{\tabledir/goettingen7_reallocation.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_reallocation}}
+  {\input{\tabledir/goettingen7_reallocation.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_reallocation_ppml}
-  \input{\tabledir/goettingen7_reallocation_ppml.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_reallocation_ppml}}
+  {\input{\tabledir/goettingen7_reallocation_ppml.tex}}
 \end{table}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{goettingen7_matched.png}
-  \caption{Placeholder.}
-  \label{fig:goettingen7_matched}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:goettingen7_matched}}
+  {\includegraphics[width=\textwidth]{goettingen7_matched.png}}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{goettingen7_placebo.png}
-  \caption{Placeholder.}
-  \label{fig:goettingen7_placebo}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:goettingen7_placebo}}
+  {\includegraphics[width=\textwidth]{goettingen7_placebo.png}}
 \end{figure}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_placebo}
-  \input{\tabledir/goettingen7_placebo.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_placebo}}
+  {\input{\tabledir/goettingen7_placebo.tex}}
 \end{table}
 
 \section{Student religion at Heidelberg}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{heidelberg_religion_tests.png}
-  \caption{Placeholder.}
-  \label{fig:heidelberg_religion_tests}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:heidelberg_religion_tests}}
+  {\includegraphics[width=\textwidth]{heidelberg_religion_tests.png}}
 \end{figure}
 
 \begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{heidelberg_religion.png}
-  \caption{Placeholder.}
-  \label{fig:heidelberg_religion}
+  \ffigbox
+  {\caption{Placeholder.}
+   \label{fig:heidelberg_religion}}
+  {\includegraphics[width=\textwidth]{heidelberg_religion.png}}
 \end{figure}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:heidelberg_religion}
-  \input{\tabledir/heidelberg_religion.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:heidelberg_religion}}
+  {\input{\tabledir/heidelberg_religion.tex}}
 \end{table}
 
 \clearpage
+
+\printbibliography
+
+
 \appendix
 
 \section{Additional tables}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:gravity_by_decade}
-  \input{\tabledir/gravity_by_decade.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:gravity_by_decade}}
+  {\input{\tabledir/gravity_by_decade.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:event_study_1819}
-  \input{\tabledir/event_study_1819.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:event_study_1819}}
+  {\input{\tabledir/event_study_1819.tex}}
+\end{table}
+
+
+\begin{table}[htbp]
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:design_b_berlin_geocodes}}
+  {\input{\tabledir/design_b_berlin_geocodes.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:design_b_berlin_checks}
-  \input{\tabledir/design_b_berlin_checks.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:design_b_berlin_provinces}}
+  {\input{\tabledir/design_b_berlin_provinces.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:design_b_berlin_geocodes}
-  \input{\tabledir/design_b_berlin_geocodes.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:design_b_berlin_east_prussia}}
+  {\input{\tabledir/design_b_berlin_east_prussia.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:design_b_berlin_provinces}
-  \input{\tabledir/design_b_berlin_provinces.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_event_study}}
+  {\input{\tabledir/goettingen7_event_study.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:design_b_berlin_east_prussia}
-  \input{\tabledir/design_b_berlin_east_prussia.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_heterogeneity}}
+  {\input{\tabledir/goettingen7_heterogeneity.tex}}
 \end{table}
 
 \begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_event_study}
-  \input{\tabledir/goettingen7_event_study.tex}
-\end{table}
-
-\begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_heterogeneity}
-  \input{\tabledir/goettingen7_heterogeneity.tex}
-\end{table}
-
-\begin{table}[htbp]
-  \centering
-  \caption{Placeholder.}
-  \label{tab:goettingen7_matched}
-  \input{\tabledir/goettingen7_matched.tex}
+  \ttabbox
+  {\caption{Placeholder.}
+   \label{tab:goettingen7_matched}}
+  {\input{\tabledir/goettingen7_matched.tex}}
 \end{table}
 
 \end{document}
