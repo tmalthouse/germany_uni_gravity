@@ -107,7 +107,7 @@ Note that confession is derived from location, as micro-level confessional data 
 
 It is possible that the student market changed over the sample period. Improvements in transportation technology may cause the distance elasticity to decrease; political changes or a changing student body may also have some effect. This section tests whether the two main parameters estimated in the previous section vary by decade.
 
-All specifications detailed in this section build on specification (1) in table~\ref{eq:gravity_baseline}. Specifications are estimated by PPML, with standard errors clustered by origin, $e$ indexes the decade, $t$ the year of first enrolment, $o$ the student's hometown, and $d$ their destination university. The distance and state border terms are interacted with decade dummies, with 1800--09 being used as the baseline. Destination-decade fixed effects absorb each university's enrolment level. The estimating equation used to create figure \ref{fig:era_coefficients} is then
+All specifications detailed in this section build on specification (1) in table~\ref{tab:gravity_structure}. Specifications are estimated by PPML, with standard errors clustered by origin, $e$ indexes the decade, $t$ the year of first enrolment, $o$ the student's hometown, and $d$ their destination university. The distance and state border terms are interacted with decade dummies, with 1800--09 being used as the baseline. Destination-decade fixed effects absorb each university's enrolment level. The estimating equation used to create figure \ref{fig:era_coefficients} is then
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
@@ -171,7 +171,7 @@ Two new universities are founded in the sample period. Berlin is established in 
 \end{equation}
 For each new university $k$, $\kappa_k > 0$ means that institution's distance elasticity is smaller in magnitude than the old universities'---that is, students travel from further away to attend.
 
-It may also be the case that these relative distance gradients vary over time, as these universities build reputations or incumbent institutions are better able to compete. In this specification, I consider only flows after the founding of the university for which I have data---that is, only the 1820--48 subsample. The estimating equation is
+It may also be the case that these relative distance gradients vary over time, as these universities build reputations or incumbent institutions are better able to compete. In this specification, for the new institutions, I consider only flows after the founding of the university for which I have data---that is, only the 1820--48 subsample. The estimating equation is
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{ode} \mid \cdot\right]
@@ -219,29 +219,27 @@ One concern is that Berlin, rather than offering a more attractive program, may 
    off less steeply with distance than the old universities' do.
    $^{*}$, $^{**}$ and $^{***}$ denote significance at the 10, 5 and 1 percent
    levels.
-   \item Panel A holds the specification fixed and varies the estimation sample.
-   ``Berlin flow'' is the share of Berlin's enrollments the sample retains, so it
-   reports how much of the pattern under test each restriction discards. The
-   eastern provinces are East and West Prussia, Posen and Silesia; unmapped
-   origins are those falling in no mapped polity, mostly foreign or border-gap
-   places. The two settlement-level rows rebuild the origin-destination grid from
-   spells geocoded to a settlement rather than filtering rows of the published
-   grid, so their origins, distances and fixed effects are all recomputed and
-   their sample sizes are not nested in the rows above.
-   \item Panel B keeps every origin and adds terms. Small origins are those
-   sending fewer than 10 students in total. The three by-region rows partition
-   the Berlin interaction, so each is a level for that group rather than a
-   contrast against the others, and the differences between them are not tested.
+   \item The specifications tested in this table are as follows:
+   \begin{itemize}
+        \item ``Without East and West Prussia'': Omits the two easternmost provinces of Prussia, near modern Kaliningrad.
+        \item ``Without the Eastern Provices'': Same as above, but also omitting Posen and Silesia in modern Poland.
+        \item ``Without unmapped origins'': Omits all origins not mapped to a German state. Eliminates foreign students and potential geocoding errors.
+        \item ``Without eastern or unmapped origins'': Combines the two previous filters.
+        \item ``Settlement-level geocodes only'': Omits students whose listed place of origin is a province or state, rather than a city or town.
+        \item ``Settlement-level, no eastern/unmapped'': Combines all of the above restrictions.
+        \item ``Same-state, same-polity controls'': Re-introduces the controls from specification \ref{eq:gravity_baseline}
+        \item ``By origin region'': Adds interactions between the distance elasticity and origin.
+        \item ``Small origin'': Adds an interaction with a dummy if a student is from a town producing less than 10 students over the sample period, no effect found.
+   \end{itemize}
    \end{tablenotes}
    \end{threeparttable}}
 \end{table}
 
 \section{The Göttingen Seven}
 
+My hypothesis is that the introduction of ``modern'' unversities changed the geography of student flow. In the previous section, we see that the newly-founded universities in Berlin and Bonn had a farther reach than incumbent universities, suggesting students were willing to travel further for their program. In this section, I perform an event study on the ``G\"ottingen Seven'' incident, where in 1837 the Kingdom of Hanover fired seven prominent liberal professors at the University of G\"ottingen. This was a prestigious institution; did this incident affect its ability to draw students?
 
-
-The December 1837 dismissals are a single-destination event study on the annual
-grid, with 1837 omitted:
+I perform a single-destination event study with 1837 as the reference year---the firings and subsequent protests happened in November, after that year's cohort had enroled. The estimating equation is
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
@@ -253,10 +251,9 @@ grid, with 1837 omitted:
 \end{split}
 \label{eq:got7_event}
 \end{equation}
-Year fixed effects absorb economy-wide and cohort shocks, so $\tau_y$ is
-Göttingen's enrollment relative to the other universities in year $y$. Splitting
-origins at 200\,km from Göttingen lets the path differ by how far students had to
-travel:
+The year fixed effects absorb any Germany-wide economic and cohort shocks, so $\tau_y$ gives G\"ottingen's enrolment relative to other universities in year $y$.
+
+I also differentiate ``near'' and ``far'' students, setting 200km as the dividing line (TODO: robustness checks on this). Many nearby students likely attended because G\"ottingen was the most convenient option or because they had university-specific networks; if there is an effect, it is likely to come from the distanct students who specifically sought out the university. This specification is estimated by
 \begin{equation}
 \begin{split}
 \ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
@@ -269,186 +266,211 @@ travel:
 \end{split}
 \label{eq:got7_heterogeneity}
 \end{equation}
-where $G_{odg} = \mathbf{1}[d = \text{Göttingen}] \, \mathbf{1}[o \in g]$. Both
-paths are estimated in one regression, so they share the likelihood and the fixed
-effects. The donor-pool and placebo exercises re-estimate \eqref{eq:got7_event}
-on restricted sets of destinations, and with each other university treated in
-turn.
-
-Where the lost students went is a pre/post comparison on the origins that sent
-students to Göttingen before the dismissals:
-\begin{equation}
-\ln \mathbb{E}\!\left[F_{odp} \mid \cdot\right]
-  = \alpha_o + \gamma_d + \delta_p
-   + \rho_{\text{G}} \, \mathbf{1}[d = \text{Göttingen}] \, \mathrm{Post}_p
-   + \rho_{\text{N}} \, \mathbf{1}[d \in \{\text{Berlin}, \text{Bonn}\}] \, \mathrm{Post}_p,
-\label{eq:got7_reallocation}
-\end{equation}
-with $p$ running over 1834--37 and 1838--41 and the other old universities as the
-omitted destination group.
+where $G_{odg} = \mathbf{1}[d = \text{Göttingen}] \, \mathbf{1}[o \in g]$. The $\tau_{gy}$ are the coefficients of interest: the difference in enrolment at G\"ottingen compared to other universities for near or far students.
 
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{An event study examining whether the G\"ottingen 7 incident affected enrolment at that university, suggesting students were specifically seeking out and traveling to prestigious universities. Note the significant pretrend in 1836. Although there appears to be a pronounced drop in enrolment after the incident, no causal conclusions can be drawn from this analysis.}
    \label{fig:goettingen7_event_study}}
   {\includegraphics[width=\textwidth]{goettingen7_event_study.png}}
 \end{figure}
 
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{An event study examining whether the G\"ottingen 7 incident affected enrolment at that university, disaggregating near- and far-origin students. The significant pretrend seen in the previous event study is limited to near-origin students. Far-origin students react more to the incident, as predicted, and we can conclude the G\"ottingen 7 incident caused a decrease in enrolment by distant students.}
    \label{fig:goettingen7_heterogeneity}}
   {\includegraphics[width=\textwidth]{goettingen7_heterogeneity.png}}
 \end{figure}
 
+I then ask where the lost students went. Let $\mathcal{O}$ be a set of origins and
+$\pi$ a period, either $\mathrm{pre} = 1834$--37 or $\mathrm{post} = 1838$--41.
+The share of that group's enrolments going to university $d$, and the change in
+that share across the two periods, are
+\begin{equation}
+\begin{split}
+s_d^{\pi}(\mathcal{O})
+  &= \frac{\sum_{o \in \mathcal{O}} \sum_{t \in \pi} F_{odt}}
+          {\sum_{d'} \sum_{o \in \mathcal{O}} \sum_{t \in \pi} F_{od't}}, \\
+\Delta s_d(\mathcal{O})
+  &= s_d^{\mathrm{post}}(\mathcal{O}) - s_d^{\mathrm{pre}}(\mathcal{O}).
+\end{split}
+\label{eq:got7_shares}
+\end{equation}
+These are accounting identities rather than estimates, and no university serves as a reference category, which is why every destination appears in
+figure~\ref{fig:goettingen7_reallocation} and
+table~\ref{tab:goettingen7_reallocation}. The treated set is the 100 far origins
+($\geq 200$\,km from G\"ottingen) that sent at least one student there in
+1834--37; the near origins, defined the same way, serve as a comparison group.
+
+Table~\ref{tab:goettingen7_reallocation_ppml} tests whether Berlin and Bonn's enrolment significantly changed as a result of this incident.
+\begin{equation}
+\begin{split}
+\ln \mathbb{E}\!\left[F_{odt} \mid \cdot\right]
+  &= \alpha_o + \gamma_d + \delta_{p(t)} \\
+  &\quad + \rho_{\text{G}} \, \mathbf{1}[d = \text{Göttingen}] \, \mathrm{Post}_{p(t)}
+   + \rho_{\text{N}} \, \mathbf{1}[d \in \{\text{Berlin}, \text{Bonn}\}] \, \mathrm{Post}_{p(t)},
+\end{split}
+\label{eq:got7_reallocation}
+\end{equation}
+where $p(t)$ is the period containing year $t$; the flows are annual, and only the
+period terms and their fixed effect are coarsened. The remaining old
+universities are the omitted category, but they are not dropped. They stay in the sample with their own destination fixed effects, and $\rho_{\text{G}}$ and
+$\rho_{\text{N}}$ measure the relative post-period change.
+
+
+
+
+
+
+\begin{table}[htbp]
+  \ttabbox
+  {\caption{Estimates of student flow reallocations from the G\"ottingen 7 incident. These results are purely descriptive. For the left half of the table, I consider all far origins that send at least one student to G\"ottingen in 1834--37, and show the total distribution of student destinations for those hometowns. I then examine the same towns' distribution of universities over 1838--41. A similar analysis is performed for the near origins on the right side of the table.}
+   \label{tab:goettingen7_reallocation}}
+  {\input{\tabledir/goettingen7_reallocation.tex}}
+\end{table}
+
+
 \begin{figure}[htbp]
   \ffigbox
-  {\caption{Placeholder.}
+  {\caption{A plot of the results displayed in table~\ref{tab:goettingen7_reallocation}, showing the reallocation of student flows from G\"ottingen-sending origins following the incident. As expected, Berlin seems to be the main beneficiary. Also as expected, far-origin students are far more responsive to this shock.}
    \label{fig:goettingen7_reallocation}}
   {\includegraphics[width=\textwidth]{goettingen7_reallocation.png}}
 \end{figure}
 
 \begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:goettingen7_reallocation}}
-  {\input{\tabledir/goettingen7_reallocation.tex}}
-\end{table}
-
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
+  \ttabbox[0.5\textwidth]
+  {\caption{This table presents a specification estimating whether Berlin and Bonn were beneficiaries of the G\"ottingen 7 incident, following equation~\ref{eq:got7_reallocation}. As expected, the firing of seven prominent professors significantly decreased enrolments at G\"ottingen. There was an associated increase in enrolment at the ``new'' universities in Berlin and Bonn, this change is much smaller and not statistically significant.}
    \label{tab:goettingen7_reallocation_ppml}}
   {\input{\tabledir/goettingen7_reallocation_ppml.tex}}
 \end{table}
 
-\begin{figure}[htbp]
-  \ffigbox
-  {\caption{Placeholder.}
-   \label{fig:goettingen7_matched}}
-  {\includegraphics[width=\textwidth]{goettingen7_matched.png}}
-\end{figure}
+% \begin{figure}[htbp]
+%   \ffigbox
+%   {\caption{Placeholder.}
+%    \label{fig:goettingen7_matched}}
+%   {\includegraphics[width=\textwidth]{goettingen7_matched.png}}
+% \end{figure}
 
-\begin{figure}[htbp]
-  \ffigbox
-  {\caption{Placeholder.}
-   \label{fig:goettingen7_placebo}}
-  {\includegraphics[width=\textwidth]{goettingen7_placebo.png}}
-\end{figure}
+% \begin{figure}[htbp]
+%   \ffigbox
+%   {\caption{Placeholder.}
+%    \label{fig:goettingen7_placebo}}
+%   {\includegraphics[width=\textwidth]{goettingen7_placebo.png}}
+% \end{figure}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:goettingen7_placebo}}
-  {\input{\tabledir/goettingen7_placebo.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:goettingen7_placebo}}
+%   {\input{\tabledir/goettingen7_placebo.tex}}
+% \end{table}
 
-\section{Student religion at Heidelberg}
+% \section{Student religion at Heidelberg}
 
-Heidelberg is the only register that records a student's religion, so a four-way
-state-by-confession split is not estimable. Instead the unit is an origin polity
-$o$ paired with a confession $r$, and the question is whether Catholic and
-Protestant enrollees were drawn from different places:
-\begin{equation}
-\ln \mathbb{E}\!\left[F_{or} \mid \cdot\right]
-  = \nu_r
-   + \beta_1 \ln \mathrm{dist}_{o}
-   + \beta_2 \mathrm{Baden}_{o}
-   + \beta_3 \, \mathbf{1}[r = \text{Catholic}] \, \mathrm{Baden}_{o},
-\label{eq:heidelberg_religion}
-\end{equation}
-where $\mathrm{dist}_{o}$ is the distance from $o$ to Heidelberg and the
-confession fixed effect $\nu_r$ absorbs the Catholic and Protestant totals, so
-$\beta_3$ is the difference in how far Baden's own students were over-represented
-by confession. Jewish students are reported descriptively but excluded here.
-Standard errors are heteroskedasticity-robust, with origin-polity clustering as a
-check.
+% Heidelberg is the only register that records a student's religion, so a four-way
+% state-by-confession split is not estimable. Instead the unit is an origin polity
+% $o$ paired with a confession $r$, and the question is whether Catholic and
+% Protestant enrollees were drawn from different places:
+% \begin{equation}
+% \ln \mathbb{E}\!\left[F_{or} \mid \cdot\right]
+%   = \nu_r
+%    + \beta_1 \ln \mathrm{dist}_{o}
+%    + \beta_2 \mathrm{Baden}_{o}
+%    + \beta_3 \, \mathbf{1}[r = \text{Catholic}] \, \mathrm{Baden}_{o},
+% \label{eq:heidelberg_religion}
+% \end{equation}
+% where $\mathrm{dist}_{o}$ is the distance from $o$ to Heidelberg and the
+% confession fixed effect $\nu_r$ absorbs the Catholic and Protestant totals, so
+% $\beta_3$ is the difference in how far Baden's own students were over-represented
+% by confession. Jewish students are reported descriptively but excluded here.
+% Standard errors are heteroskedasticity-robust, with origin-polity clustering as a
+% check.
 
-\begin{figure}[htbp]
-  \ffigbox
-  {\caption{Placeholder.}
-   \label{fig:heidelberg_religion_tests}}
-  {\includegraphics[width=\textwidth]{heidelberg_religion_tests.png}}
-\end{figure}
+% \begin{figure}[htbp]
+%   \ffigbox
+%   {\caption{Placeholder.}
+%    \label{fig:heidelberg_religion_tests}}
+%   {\includegraphics[width=\textwidth]{heidelberg_religion_tests.png}}
+% \end{figure}
 
-\begin{figure}[htbp]
-  \ffigbox
-  {\caption{Placeholder.}
-   \label{fig:heidelberg_religion}}
-  {\includegraphics[width=\textwidth]{heidelberg_religion.png}}
-\end{figure}
+% \begin{figure}[htbp]
+%   \ffigbox
+%   {\caption{Placeholder.}
+%    \label{fig:heidelberg_religion}}
+%   {\includegraphics[width=\textwidth]{heidelberg_religion.png}}
+% \end{figure}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:heidelberg_religion}}
-  {\input{\tabledir/heidelberg_religion.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:heidelberg_religion}}
+%   {\input{\tabledir/heidelberg_religion.tex}}
+% \end{table}
 
-\clearpage
+% \clearpage
 
 \printbibliography
 
 
-\appendix
+% \appendix
 
-\section{Additional tables}
+% \section{Additional tables}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:gravity_by_decade}}
-  {\input{\tabledir/gravity_by_decade.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:gravity_by_decade}}
+%   {\input{\tabledir/gravity_by_decade.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:event_study_1819}}
-  {\input{\tabledir/event_study_1819.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:event_study_1819}}
+%   {\input{\tabledir/event_study_1819.tex}}
+% \end{table}
 
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:design_b_berlin_geocodes}}
-  {\input{\tabledir/design_b_berlin_geocodes.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:design_b_berlin_geocodes}}
+%   {\input{\tabledir/design_b_berlin_geocodes.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:design_b_berlin_provinces}}
-  {\input{\tabledir/design_b_berlin_provinces.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:design_b_berlin_provinces}}
+%   {\input{\tabledir/design_b_berlin_provinces.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:design_b_berlin_east_prussia}}
-  {\input{\tabledir/design_b_berlin_east_prussia.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:design_b_berlin_east_prussia}}
+%   {\input{\tabledir/design_b_berlin_east_prussia.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:goettingen7_event_study}}
-  {\input{\tabledir/goettingen7_event_study.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:goettingen7_event_study}}
+%   {\input{\tabledir/goettingen7_event_study.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:goettingen7_heterogeneity}}
-  {\input{\tabledir/goettingen7_heterogeneity.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:goettingen7_heterogeneity}}
+%   {\input{\tabledir/goettingen7_heterogeneity.tex}}
+% \end{table}
 
-\begin{table}[htbp]
-  \ttabbox
-  {\caption{Placeholder.}
-   \label{tab:goettingen7_matched}}
-  {\input{\tabledir/goettingen7_matched.tex}}
-\end{table}
+% \begin{table}[htbp]
+%   \ttabbox
+%   {\caption{Placeholder.}
+%    \label{tab:goettingen7_matched}}
+%   {\input{\tabledir/goettingen7_matched.tex}}
+% \end{table}
 
 \end{document}
